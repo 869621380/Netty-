@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="Constants.properties"/>
+    <settings>
+        <!-- 开启驼峰命名转换 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
+
+    <typeHandlers>
+        <typeHandler handler="org.example.Handler.Handler.MessageContentTypeHandler"/>
+    </typeHandlers>
+
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${DB_DRIVER}"/>
+                <property name="url" value="${DB_URL}"/>
+                <property name="username" value="${DB_USERNAME}"/>
+                <property name="password" value="${DB_PASSWORD}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+        <package name="org.example.Handler.Dao"/>
+    </mappers>
+
+
+</configuration>

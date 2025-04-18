@@ -25,7 +25,6 @@ public class ChatItem {
         //预览消息
         private  String preview;
         //预览消息时间
-        @Format(formats = "yyyy-MM-dd hh:mm::ss")
-        private LocalDate previewTime;
+        private String previewTime;
 
 }

@@ -1,13 +1,17 @@
 package org.example.Model.message;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.example.Model.message.requestMessage.*;
+import org.example.Model.message.responseMessage.LoginRequestResponseMessage;
+import org.example.Util.SequenceIdUtil;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
 @Data
-
 public abstract class Message implements Serializable {
 
     /**
@@ -21,6 +25,10 @@ public abstract class Message implements Serializable {
 
     private int sequenceId;
     private int messageType;
+
+    public Message() {
+        this.sequenceId= SequenceIdUtil.getSequenceId();
+    }
 
     public abstract int getMessageType();
 
@@ -43,11 +51,11 @@ public abstract class Message implements Serializable {
 
     static {
         messageClasses.put(LoginRequestEvent, LoginRequestMessage.class);
-        messageClasses.put(LoginResponseEvent, LoginResponseMessage.class);
-        messageClasses.put(SingleTextRequestMessage, SingleTextChatMessage.class);
-        messageClasses.put(SingleImageRequestMessage, SingleImageChatMessage.class);
-        messageClasses.put(SingleVideoRequestMessage, SingleVideoChatMessage.class);
-        messageClasses.put(SingleFileRequestMessage, SingleFileChatMessage.class);
+        messageClasses.put(LoginResponseEvent, LoginRequestResponseMessage.class);
+        messageClasses.put(SingleTextRequestMessage, SingleChatTextRequestMessage.class);
+        messageClasses.put(SingleImageRequestMessage, SingleChatImageMessage.class);
+        messageClasses.put(SingleVideoRequestMessage, SingleChatVideoRequestMessage.class);
+        messageClasses.put(SingleFileRequestMessage, SingleChatFileRequestMessage.class);
 
     }
 

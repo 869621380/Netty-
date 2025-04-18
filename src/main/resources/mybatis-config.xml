@@ -3,15 +3,13 @@
         PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
-    <properties resource="Constants.properties"/>
+    <properties resource="application.properties"/>
     <settings>
         <!-- 开启驼峰命名转换 -->
         <setting name="mapUnderscoreToCamelCase" value="true"/>
     </settings>
 
-    <typeHandlers>
-        <typeHandler handler="org.example.Handler.Handler.MessageContentTypeHandler"/>
-    </typeHandlers>
+
 
     <environments default="development">
         <environment id="development">
@@ -26,7 +24,7 @@
     </environments>
 
     <mappers>
-        <package name="org.example.Handler.Dao"/>
+        <package name="org.example.Dao"/>
     </mappers>
 
 

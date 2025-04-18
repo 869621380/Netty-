@@ -3,7 +3,8 @@ package org.example.View;
 
 
 import org.example.Controller.LoginController;
-import org.example.Model.message.LoginMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,6 +18,7 @@ import java.io.IOException;
 
 public class LoginView extends JFrame {
 
+    private static final Logger log = LoggerFactory.getLogger(LoginView.class);
     private BufferedImage backgroundImage;
     private final JPanel backgroundPanel;
 
@@ -33,6 +35,7 @@ public class LoginView extends JFrame {
 
     boolean registerStatus = false;
 
+
     public LoginView() {
         setTitle("登录界面");
         setSize(330, 450);
@@ -43,7 +46,7 @@ public class LoginView extends JFrame {
         try {
             backgroundImage = ImageIO.read(new File("img.png"));
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error(e.getMessage());
         }
 
         backgroundPanel = getJPanel();
@@ -73,9 +76,11 @@ public class LoginView extends JFrame {
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("sd");
                 if (listener != null) {
-                    listener.onLoginRequest(usernameField.getText(), new String(passwordField.getPassword()));
+                    if(!usernameField.getText().matches("^\\d+$")){
+                        showMessage("请输入正确的账号格式");
+                    }
+                    else listener.onLoginRequest(usernameField.getText(), new String(passwordField.getPassword()));
                 }
             }
         });
@@ -148,8 +153,8 @@ public class LoginView extends JFrame {
         }
     }
 
-    private class PlaceholderTextField extends JTextField {
-        private String placeholder;
+    private static class PlaceholderTextField extends JTextField {
+        private final String placeholder;
 
         public PlaceholderTextField(String placeholder) {
             this.placeholder = placeholder;
@@ -176,7 +181,7 @@ public class LoginView extends JFrame {
         }
     }
 
-    private class PlaceholderPasswordField extends JPasswordField {
+    private static class PlaceholderPasswordField extends JPasswordField {
         private boolean isPlaceholderVisible() {
             return getPassword().length == 0;
         }

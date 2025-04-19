@@ -37,15 +37,18 @@ public abstract class Message implements Serializable {
     public static final int RegisterRequestEvent = 2;
     public static final int RegisterResponseEvent = 3;
 
-    public static final int SingleTextRequestMessage=100;
-    public static final int SingleImageRequestMessage = 101;
-    public static final int SingleVideoRequestMessage = 102;
-    public static final int SingleFileRequestMessage = 103;
+    public static final int SingleTextRequestMessage=10;
+    public static final int SingleImageRequestMessage = 11;
+    public static final int SingleVideoRequestMessage = 12;
+    public static final int SingleFileRequestMessage = 13;
 
-    public static final int GroupTextMessage = 200;
-    public static final int GroupImageMessage = 201;
-    public static final int GroupVideoMessage = 202;
-    public static final int GroupFileMessage = 203;
+    public static final int GroupTextMessage = 40;
+    public static final int GroupImageMessage = 41;
+    public static final int GroupVideoMessage = 42;
+    public static final int GroupFileMessage = 43;
+
+    public static final int PingMessage=126;
+    public static final int PongMessage=127;
 
     private static final Map<Integer, Class<? extends Message>> messageClasses = new HashMap<>();
 
@@ -56,7 +59,8 @@ public abstract class Message implements Serializable {
         messageClasses.put(SingleImageRequestMessage, SingleChatImageMessage.class);
         messageClasses.put(SingleVideoRequestMessage, SingleChatVideoRequestMessage.class);
         messageClasses.put(SingleFileRequestMessage, SingleChatFileRequestMessage.class);
-
+        messageClasses.put(PingMessage, PingMessage.class);
+        messageClasses.put(PongMessage, PongMessage.class);
     }
 
 

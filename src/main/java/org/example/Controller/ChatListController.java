@@ -27,6 +27,8 @@ public class ChatListController implements ChatListPanel.ChatListListener {
     public void setInitData(Integer userId) {
         List<ChatItem>chatItems=chatListService.getChatItems(userId);
         view.addChatItem(chatItems);
+        view.revalidate();
+        view.repaint();
         new Thread(()-> {
             view.addChatWindow(chatItems);
             latch.countDown();

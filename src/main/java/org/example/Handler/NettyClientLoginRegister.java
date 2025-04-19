@@ -30,6 +30,7 @@ public class NettyClientLoginRegister extends SimpleChannelInboundHandler<LoginR
                 public void run() {
                     MainFrame mainFrame=new MainFrame(Integer.parseInt(response.getReason()));
                     mainFrame.setVisible(true);
+
                     mainFrame.addCtx(ctx);
                 }
             });

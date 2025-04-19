@@ -7,6 +7,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.example.Controller.LoginController;
+import org.example.Handler.HeartbeatAndPongHandler;
+
 import org.example.Handler.NettyClientLoginRegister;
 import org.example.Handler.SingleChatRequestHandler;
 import org.example.Model.message.responseMessage.LoginRequestResponseMessage;
@@ -31,10 +33,11 @@ public class Client {
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
-                ch.pipeline().addLast(new IdleStateHandler(0, 1, 0));
-
+                ch.pipeline().addLast(new IdleStateHandler(0, 3, 0));
                 ch.pipeline().addLast(new ProtoFrameDecoder());
                 ch.pipeline().addLast(new MessageCodec());
+                ch.pipeline().addLast(new HeartbeatAndPongHandler());
+
                 ch.pipeline().addLast(new NettyClientLoginRegister(loginController));
                 ch.pipeline().addLast(new SingleChatRequestHandler());
             }

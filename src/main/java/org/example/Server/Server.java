@@ -8,10 +8,12 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.example.Model.proto.MessageCodec;
 import org.example.Model.proto.ProtoFrameDecoder;
 import org.example.Server.Handler.GlobalExceptionHandler;
 import org.example.Server.Handler.LoginRequestMessageHandler;
+import org.example.Server.Handler.ServerHeartbeatHandler;
 import org.example.Server.Handler.SingleChatMessageHandler;
 
 public class Server {
@@ -26,8 +28,11 @@ public class Server {
         Channel channel=bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
             @Override protected
             void initChannel(SocketChannel ch) throws Exception {
+                ch.pipeline().addLast(new IdleStateHandler(5, 0, 0));
+
                 ch.pipeline().addLast(new ProtoFrameDecoder());
                 ch.pipeline().addLast(new MessageCodec());
+                ch.pipeline().addLast(new ServerHeartbeatHandler());
                 ch.pipeline().addLast(new LoggingHandler(LogLevel.DEBUG));
                 ch.pipeline().addLast(new LoginRequestMessageHandler());
                 ch.pipeline().addLast(new SingleChatMessageHandler());

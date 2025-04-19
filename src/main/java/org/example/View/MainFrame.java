@@ -9,6 +9,8 @@ import org.example.View.ChatWindow;
 import org.example.View.ChatListPanel;
 
 import javax.swing.*;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +25,7 @@ public class MainFrame extends JFrame {
     private ChatWindow currentWindow;
     public MainFrame(Integer userId) {
         setTitle("Main Frame");
+        LocalDateTime now = LocalDateTime.now();
         setSize(925,650);
         setLayout(null);
         setVisible(true);
@@ -31,6 +34,7 @@ public class MainFrame extends JFrame {
         chatListController = new ChatListController(chatListPanel);
         chatListPanel.setVisible(true);
         chatListPanel.setBounds(50,-5,240,650);
+        add(chatListPanel);
         new Thread(()-> {
             try {
                 chatListController.getLatch().await();
@@ -47,10 +51,9 @@ public class MainFrame extends JFrame {
             revalidate();
             repaint();
         }).start();
-
-
-        add(chatListPanel);
-
+        LocalDateTime now2 = LocalDateTime.now();
+        Duration duration = Duration.between(now2,now);
+        System.out.println(duration.toMillis());
 
 
     }
@@ -64,12 +67,15 @@ public class MainFrame extends JFrame {
 
     public void addCtx(ChannelHandlerContext ctx){
         chatListController.setCtx(ctx);
-        try {
-            chatListController.getLatch().await();
-            for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
-                entry.getValue().setCtx(ctx);
-            }
-        }catch(InterruptedException e){}
+        new Thread(()-> {
+            try {
+                chatListController.getLatch().await();
+                for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
+                    entry.getValue().setCtx(ctx);
+                }
+            }catch(InterruptedException e){}
+        }).start();
+
 
     }
 }

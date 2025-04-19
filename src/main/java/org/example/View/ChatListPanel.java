@@ -148,7 +148,7 @@ public class ChatListPanel extends JPanel {
             textPanel.setOpaque(false);
 
             titleLabel.setFont(new Font("微软雅黑", Font.BOLD, 16));
-            previewLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 12));
+            previewLabel.setFont(new Font("Noto Sans CJK SC", Font.PLAIN, 12));
             previewLabel.setForeground(new Color(150, 150, 150));
 
             textPanel.add(titleLabel);

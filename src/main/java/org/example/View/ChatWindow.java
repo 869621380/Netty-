@@ -5,6 +5,7 @@ import org.example.Model.message.requestMessage.ChatRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -12,7 +13,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
@@ -42,7 +45,8 @@ public class ChatWindow extends JLabel {
     //头像
     private BufferedImage senderAvatar;
     private BufferedImage receiverAvatar;
-
+    //文件
+    JButton fileButton;
 
     /**
      *
@@ -91,7 +95,7 @@ public class ChatWindow extends JLabel {
         JPanel inputPanel = new JPanel(new BorderLayout());
         inputField = new JTextField();
         sendButton = new JButton("发送");
-        JButton fileButton = new JButton("发送文件/图片/视频");
+        fileButton = new JButton("发送文件/图片/视频");
         emojiButton = new JButton("😀");
 
         // 创建按钮面板
@@ -103,6 +107,7 @@ public class ChatWindow extends JLabel {
         inputPanel.add(inputField, BorderLayout.CENTER);
         inputPanel.add(fileButton, BorderLayout.SOUTH);
         add(inputPanel, BorderLayout.SOUTH);
+
 
         // 初始化表情菜单
         initEmojiMenu();
@@ -237,8 +242,45 @@ public class ChatWindow extends JLabel {
                     sendMessage();
             }
         });
-    }
 
+        // 文件/图片/视频发送按钮的事件监听器
+        fileButton.addActionListener(e -> {
+            JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                if (file != null) {
+                    if (isImage(file)) {
+                        try {
+                            byte[] fileImage = imageFileToByteArray(file);
+                            SingleChatMessage message=new SingleChatMessage(
+                                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")),
+                                    SingleChatMessage.SENDING,senderId,receiverId,"image",fileImage);
+                            addMessage(message);
+                            listener.sendMessage(message);
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+
+                    } else if (isVideo(file)) {
+                        //        addMessage(new VideoMessageContent(file), true);
+                    } else {
+                        //        addMessage(new FileMessageContent(file), true);
+                    }
+                }
+            }
+        });
+    }
+    public static byte[] imageFileToByteArray(File file) throws IOException {
+        BufferedImage image = ImageIO.read(file);
+        if (image == null) {
+            return null;
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        // 假设图像格式为 PNG，你可以根据实际情况修改
+        ImageIO.write(image, "png", baos);
+        return baos.toByteArray();
+    }
     private void sendMessage(){
         if(listener!=null) {
             SingleChatMessage singleChatMessage =

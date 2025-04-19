@@ -12,11 +12,9 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -155,11 +153,14 @@ public class MessagePanel extends JPanel implements ActionListener {
         if (content.getType().equals("text")) {
             return getTextContentPanel(content, isSelf);
         }
+        else if(content.getType().equals("image")) {
+            return getImageContentPanel(content, isSelf);
+        }
         return null;
     }
 
     private JPanel getTextContentPanel(SingleChatMessage content, boolean isSelf) {
-        JTextArea messageTextArea = new JTextArea(content.getContent());
+        JTextArea messageTextArea = new JTextArea(String.valueOf(content.getContent()));
         messageTextArea.setEditable(false);
         messageTextArea.setLineWrap(true);
         messageTextArea.setWrapStyleWord(true);
@@ -222,5 +223,61 @@ public class MessagePanel extends JPanel implements ActionListener {
             revalidate();
             repaint();
         }
+    }
+
+    /**
+     * 图片消息
+     */
+
+    public JPanel getImageContentPanel(SingleChatMessage singleChatMessage,boolean isSelf)  {
+        JPanel messageBubblePanel = new JPanel(new BorderLayout());
+        messageBubblePanel.setOpaque(true);
+        if (isSelf) {
+            messageBubblePanel.setBackground(new Color(200, 255, 200));
+            messageBubblePanel.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(150, 255, 150)),
+                    BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            ));
+        } else {
+            messageBubblePanel.setBackground(Color.WHITE);
+            messageBubblePanel.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Color.LIGHT_GRAY),
+                    BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            ));
+        }
+
+        byte[] img = (byte[]) singleChatMessage.getContent();
+        try {
+            ByteArrayInputStream bis = new ByteArrayInputStream(img);
+            // 使用 ImageIO 读取输入流并转换为 BufferedImage
+            BufferedImage bufferedImage = ImageIO.read(bis);
+            Image scaledImage = bufferedImage.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+            JLabel fileOrImageLabel = new JLabel(new ImageIcon(scaledImage));
+            messageBubblePanel.add(fileOrImageLabel, BorderLayout.CENTER);
+            // 添加鼠标双击事件监听器
+            fileOrImageLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() == 2) {
+                        previewImage(bufferedImage);
+                    }
+                }
+            });
+        }catch (Exception e) {}
+
+
+
+
+        return messageBubblePanel;
+    }
+
+    private void previewImage(BufferedImage image) {
+        JFrame previewFrame = new JFrame("图片预览");
+        previewFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        JLabel imageLabel = new JLabel(new ImageIcon(image));
+        previewFrame.getContentPane().add(imageLabel, BorderLayout.CENTER);
+        previewFrame.pack();
+        previewFrame.setLocationRelativeTo(null);
+        previewFrame.setVisible(true);
     }
 }

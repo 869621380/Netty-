@@ -56,7 +56,7 @@ public abstract class Message implements Serializable {
         messageClasses.put(LoginRequestEvent, LoginRequestMessage.class);
         messageClasses.put(LoginResponseEvent, LoginRequestResponseMessage.class);
         messageClasses.put(SingleTextRequestMessage, SingleChatTextRequestMessage.class);
-        messageClasses.put(SingleImageRequestMessage, SingleChatImageMessage.class);
+        messageClasses.put(SingleImageRequestMessage, SingleChatImageRequestMessage.class);
         messageClasses.put(SingleVideoRequestMessage, SingleChatVideoRequestMessage.class);
         messageClasses.put(SingleFileRequestMessage, SingleChatFileRequestMessage.class);
         messageClasses.put(PingMessage, PingMessage.class);

@@ -20,10 +20,10 @@ public class SingleChatMessage extends Message{
     //消息类型
     private String type;
     //消息内容
-    private String content;
+    private Object content;
 
 
-    public SingleChatMessage(String sendTime, String sendStatus, Integer senderID, Integer receiverID, String type, String content) {
+    public SingleChatMessage(String sendTime, String sendStatus, Integer senderID, Integer receiverID, String type, Object content) {
         this.sendTime = sendTime;
         this.sendStatus = sendStatus;
         this.senderID = senderID;

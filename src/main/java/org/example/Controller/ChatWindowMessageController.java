@@ -6,16 +6,20 @@ import org.example.Cache.MessageCache;
 import org.example.Model.Domain.Message;
 import org.example.Model.Domain.SingleChatMessage;
 import org.example.Model.Domain.UserInfo;
+import org.example.Model.message.requestMessage.SingleChatImageRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
 import org.example.Service.ChatMessageService;
 import org.example.Service.UserInfoService;
 import org.example.View.ChatWindow;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -24,6 +28,7 @@ import java.util.Map;
 
 public class ChatWindowMessageController implements ChatWindow.ChatMessageListener {
 
+    private static final Logger log = LoggerFactory.getLogger(ChatWindowMessageController.class);
     private  ChatWindow view;
     private final ChatMessageService chatMessageService;
     private final UserInfoService userInfoService;
@@ -79,15 +84,24 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
 
     @Override
     public void sendMessage(SingleChatMessage content) {
-        SingleChatRequestMessage singleChatRequestMessage;
+        SingleChatRequestMessage singleChatRequestMessage = null;
         if(content.getType().equals("text")){
-            singleChatRequestMessage=new SingleChatTextRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),content.getContent());
-            MessageCache.getChatListController().updatePreview(content.getReceiverID(),content.getContent());
-            if(ctx!=null){
-                MessageCache.addMessageCache(singleChatRequestMessage.getSequenceId(),content);
-                content.changeSendStatus(Message.SENT);
-                ctx.writeAndFlush(singleChatRequestMessage);
-            }
+            singleChatRequestMessage=new SingleChatTextRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),(String) content.getContent());
+            MessageCache.getChatListController().updatePreview(content.getReceiverID(), (String) content.getContent());
+        }
+        else if(content.getType().equals("image")){
+
+            singleChatRequestMessage=new SingleChatImageRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),(byte[])content.getContent());
+            log.debug("HERE WILL SEND IMAGE");
+            MessageCache.getChatListController().updatePreview(content.getReceiverID(),"[图片]");
+        }
+
+        if(ctx!=null&&singleChatRequestMessage!=null){
+            MessageCache.addMessageCache(singleChatRequestMessage.getSequenceId(),content);
+            //这里应该响应后再SENT
+            content.changeSendStatus(Message.SENT);
+            ctx.writeAndFlush(singleChatRequestMessage);
+            log.debug("HERE SEND MESSAGE"+singleChatRequestMessage.getMessageType());
         }
     }
 

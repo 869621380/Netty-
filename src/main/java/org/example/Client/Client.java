@@ -33,7 +33,7 @@ public class Client {
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
-                ch.pipeline().addLast(new IdleStateHandler(0, 3, 0));
+                ch.pipeline().addLast(new IdleStateHandler(0, 15, 0));
                 ch.pipeline().addLast(new ProtoFrameDecoder());
                 ch.pipeline().addLast(new MessageCodec());
                 ch.pipeline().addLast(new HeartbeatAndPongHandler());

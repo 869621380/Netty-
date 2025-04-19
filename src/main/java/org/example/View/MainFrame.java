@@ -44,6 +44,7 @@ public class MainFrame extends JFrame {
             Map<Integer,ChatWindow>chatWindowMap=chatListPanel.getChatWindowMap();
             chatWindowMessageControllerMap=chatListPanel.getChatWindowMessageControllerMap();
             MessageCache.setChatWindowMessageControllerMap(chatWindowMessageControllerMap);
+            MessageCache.setChatListController(chatListController);
             for(Map.Entry<Integer,ChatWindow> entry:chatWindowMap.entrySet()){
                 entry.getValue().setBounds(300, 0, 610, 613);
                 add(entry.getValue());

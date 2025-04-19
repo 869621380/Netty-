@@ -1,6 +1,8 @@
 package org.example.Cache;
 
+import lombok.Getter;
 import lombok.Setter;
+import org.example.Controller.ChatListController;
 import org.example.Controller.ChatWindowMessageController;
 import org.example.Model.Domain.Message;
 import org.example.Model.Domain.SingleChatMessage;
@@ -12,6 +14,9 @@ public class MessageCache {
     private static final Map<Integer, Message> messageCache = new HashMap<>();
     @Setter
     private static Map<Integer,ChatWindowMessageController>chatWindowMessageControllerMap;
+    @Setter
+    @Getter
+    private static ChatListController chatListController;
     public static void addMessageCache(Integer id,Message message){
         messageCache.put(id, message);
     }

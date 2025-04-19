@@ -30,7 +30,10 @@ public class SingleChatRequestHandler extends SimpleChannelInboundHandler<Single
                                 singleChatRequestMessage.getReceiverID(),"text",((SingleChatTextRequestMessage) singleChatRequestMessage).getContent());
                 log.debug(singleChatMessage.toString());
                 chatWindowMessageController.receiveMessage(singleChatMessage);
+
+                MessageCache.getChatListController().updatePreview(singleChatMessage.getSenderID(),singleChatMessage.getContent());
             }
+
         }
     }
 }

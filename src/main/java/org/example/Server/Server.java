@@ -28,7 +28,7 @@ public class Server {
         Channel channel=bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
             @Override protected
             void initChannel(SocketChannel ch) throws Exception {
-                ch.pipeline().addLast(new IdleStateHandler(5, 0, 0));
+                ch.pipeline().addLast(new IdleStateHandler(30, 0, 0));
 
                 ch.pipeline().addLast(new ProtoFrameDecoder());
                 ch.pipeline().addLast(new MessageCodec());

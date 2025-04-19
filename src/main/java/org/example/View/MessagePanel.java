@@ -17,6 +17,15 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+
 
 public class MessagePanel extends JPanel implements ActionListener {
 
@@ -38,10 +47,10 @@ public class MessagePanel extends JPanel implements ActionListener {
      */
     public MessagePanel(BufferedImage avatarImage, SingleChatMessage content, int userId) {
 
-        this.isSelf=content.getSenderID()==userId;
-        this.content=content;
+        this.isSelf = content.getSenderID() == userId;
+        this.content = content;
         content.addContentChangedListener(this);
-        setLayout(avatarImage,content,userId);
+        setLayout(avatarImage, content, userId);
 
     }
 
@@ -49,7 +58,7 @@ public class MessagePanel extends JPanel implements ActionListener {
         setLayout(null);
         setOpaque(false);
         // 头像标签
-        avatarLabel=new JLabel();
+        avatarLabel = new JLabel();
         setAvatarLabel(avatarImage);
         add(avatarLabel);
 
@@ -65,7 +74,7 @@ public class MessagePanel extends JPanel implements ActionListener {
             add(statusLabel);
         }
         // 消息气泡
-        JPanel bubblePanel = getContentPanel(content,isSelf);
+        JPanel bubblePanel = getContentPanel(content, isSelf);
         add(bubblePanel);
 
         layoutComponents(avatarLabel, timeLabel, bubblePanel, Constants.MESSAGE_PANEL_WIDTH);
@@ -73,15 +82,14 @@ public class MessagePanel extends JPanel implements ActionListener {
 
 
     public void setAvatarLabel(BufferedImage avatarImage) {
-        if(avatarImage != null) {
+        if (avatarImage != null) {
             avatarLabel.setIcon(new ImageIcon(avatarImage.getScaledInstance(AVATAR_SIZE, AVATAR_SIZE, Image.SCALE_SMOOTH)));
-        }
-        else{
+        } else {
             try {
                 BufferedImage original = ImageIO.read(new File(Constants.DEFAULT_AVATAR));
                 Image scaled = original.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
                 avatarLabel.setIcon(new ImageIcon(scaled.getScaledInstance(AVATAR_SIZE, AVATAR_SIZE, Image.SCALE_SMOOTH)));
-            }catch (IOException e) {
+            } catch (IOException e) {
                 log.error(e.getMessage());
             }
         }
@@ -117,20 +125,35 @@ public class MessagePanel extends JPanel implements ActionListener {
         if (isSelf) {
             avatar.setLocation(width - AVATAR_SIZE - 2, time.getHeight() + 2);
             bubble.setLocation(width - AVATAR_SIZE - bubble.getWidth() - 10, time.getHeight() + 2);
-            time.setLocation(width - AVATAR_SIZE - bubble.getWidth()/2 - time.getWidth()/2 - 30, 0);
+            time.setLocation(width - AVATAR_SIZE - bubble.getWidth() / 2 - time.getWidth() / 2 - 30, 0);
             statusLabel.setSize(40, 15);
-            statusLabel.setLocation(width - AVATAR_SIZE - bubble.getWidth()/2 - time.getWidth()/2 +60, 0);
+            statusLabel.setLocation(width - AVATAR_SIZE - bubble.getWidth() / 2 - time.getWidth() / 2 + 60, 0);
         } else {
             avatar.setLocation(2, time.getHeight() + 2);
             bubble.setLocation(AVATAR_SIZE + 6, time.getHeight() + 2);
-            time.setLocation(AVATAR_SIZE + 6 + bubble.getWidth()/2 - time.getWidth()/2, 0);
+            time.setLocation(AVATAR_SIZE + 6 + bubble.getWidth() / 2 - time.getWidth() / 2, 0);
         }
+    }
+
+    private void layoutComponents() {
+        Component[] comps = getComponents();
+        JLabel avatar = (JLabel) comps[0];
+        JLabel time = (JLabel) comps[1];
+        JPanel bubble = (JPanel) (isSelf ? comps[3] : comps[2]);
+
+        layoutComponents(avatar, time, bubble, getWidth());
+    }
+
+    @Override
+    public void setBounds(int x, int y, int width, int height) {
+        super.setBounds(x, y, width, height);
+        layoutComponents();
     }
 
     public JPanel getContentPanel(SingleChatMessage content, boolean isSelf) {
 
-        if(content.getType().equals("text")) {
-            return getTextContentPanel(content,isSelf);
+        if (content.getType().equals("text")) {
+            return getTextContentPanel(content, isSelf);
         }
         return null;
     }
@@ -162,13 +185,14 @@ public class MessagePanel extends JPanel implements ActionListener {
 
         return messageBubblePanel;
     }
+
     @Override
     public Dimension getPreferredSize() {
         Component[] comps = getComponents();
-        JPanel bubble = (JPanel)(isSelf ? comps[3] : comps[2]);
-        JLabel time = (JLabel)comps[1];
+        JPanel bubble = (JPanel) (isSelf ? comps[3] : comps[2]);
+        JLabel time = (JLabel) comps[1];
 
-        int height = time.getHeight() + bubble.getHeight() + 2;
+        int height = time.getHeight() + bubble.getPreferredSize().height + 2;
         int width = 580;
         return new Dimension(width, height);
     }

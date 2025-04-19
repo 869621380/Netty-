@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 
@@ -83,6 +84,7 @@ public class ChatListPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 int index = list.locationToIndex(e.getPoint());
                 if (index >= 0) {
+                    listModel.getElementAt(index).setUnreadCount(0);
               //      ChatItem item = list.getModel().getElementAt(index);
                     ChatWindow chatWindow = chatWindowMap.get(list.getModel().getElementAt(index).getReceiverId());
                     if(currentChatWindow==null){
@@ -115,6 +117,16 @@ public class ChatListPanel extends JPanel {
         }
     }
 
+    public void updateItem(Integer receiverId,String content) {
+        for(int i=0; i<listModel.size(); i++){
+            ChatItem chatItem = listModel.get(i);
+            if(chatItem.getReceiverId().equals(receiverId)){
+                chatItem.setPreview(content);
+                chatItem.setPreviewTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+                break;
+            }
+        }
+    }
 
 
     private static class ChatItemRenderer extends JPanel implements ListCellRenderer<ChatItem> {
@@ -136,7 +148,7 @@ public class ChatListPanel extends JPanel {
             textPanel.setOpaque(false);
 
             titleLabel.setFont(new Font("微软雅黑", Font.BOLD, 16));
-            previewLabel.setFont(new Font("微软雅黑", Font.PLAIN, 12));
+            previewLabel.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 12));
             previewLabel.setForeground(new Color(150, 150, 150));
 
             textPanel.add(titleLabel);

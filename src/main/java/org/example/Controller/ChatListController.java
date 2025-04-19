@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.Model.Domain.ChatItem;
+import org.example.Model.Domain.SingleChatMessage;
 import org.example.Service.ChatListService;
 import org.example.View.ChatListPanel;
 
@@ -33,6 +34,13 @@ public class ChatListController implements ChatListPanel.ChatListListener {
             view.addChatWindow(chatItems);
             latch.countDown();
         }).start();
+    }
+
+    public void updatePreview(Integer receiverId,String content) {
+        view.updateItem(receiverId,content);
+
+        view.revalidate();
+        view.repaint();
     }
 
 }

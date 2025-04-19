@@ -82,7 +82,7 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
         SingleChatRequestMessage singleChatRequestMessage;
         if(content.getType().equals("text")){
             singleChatRequestMessage=new SingleChatTextRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),content.getContent());
-
+            MessageCache.getChatListController().updatePreview(content.getReceiverID(),content.getContent());
             if(ctx!=null){
                 MessageCache.addMessageCache(singleChatRequestMessage.getSequenceId(),content);
                 content.changeSendStatus(Message.SENT);

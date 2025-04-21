@@ -3,8 +3,6 @@ package org.example.Dao;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.example.Model.Domain.SingleChatMessage;
-import org.example.Model.message.requestMessage.SingleChatRequestMessage;
-import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
 
 import java.util.List;
 

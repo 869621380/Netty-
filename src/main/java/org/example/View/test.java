@@ -1,8 +1,6 @@
 package org.example.View;
 
 import org.example.Controller.ChatListController;
-import org.example.Controller.ChatWindowMessageController;
-import org.example.Model.Domain.SingleChatMessage;
 
 import javax.swing.*;
 

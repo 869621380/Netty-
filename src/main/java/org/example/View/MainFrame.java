@@ -7,17 +7,10 @@ import org.example.Cache.MessageCache;
 import org.example.Controller.ChatListController;
 import org.example.Controller.ChatWindowMessageController;
 import org.example.Util.ThreadPoolManager;
-import org.example.View.ChatWindow;
-import org.example.View.ChatListPanel;
 
 import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MainFrame extends JFrame {

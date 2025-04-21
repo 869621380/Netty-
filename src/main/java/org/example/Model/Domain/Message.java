@@ -1,6 +1,5 @@
 package org.example.Model.Domain;
 
-import lombok.Data;
 import lombok.Getter;
 
 import java.awt.event.ActionEvent;

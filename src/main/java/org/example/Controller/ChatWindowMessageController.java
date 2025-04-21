@@ -2,31 +2,18 @@ package org.example.Controller;
 
 import io.netty.channel.ChannelHandlerContext;
 import lombok.Setter;
-import org.example.Cache.MessageCache;
-import org.example.Model.Domain.Message;
 import org.example.Model.Domain.SingleChatMessage;
 import org.example.Model.Domain.UserInfo;
-import org.example.Model.message.requestMessage.LoginStatusRequestMessage;
-import org.example.Model.message.requestMessage.SingleChatImageRequestMessage;
-import org.example.Model.message.requestMessage.SingleChatRequestMessage;
-import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
 import org.example.Service.ChatMessageService;
 import org.example.Service.UserInfoService;
-import org.example.Util.ThreadPoolManager;
 import org.example.View.ChatWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ChatWindowMessageController implements ChatWindow.ChatMessageListener {
 
@@ -49,7 +36,6 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
     public void setView(ChatWindow view) {
         this.view=view;
         if(view!=null) view.setChatWindowMessageListener(this);
-
     }
 
     @Override
@@ -59,71 +45,21 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
         view.setReceiverNameLabel(userInfos.get(1).getNickname());
         view.setStatusLabel("未知");
         //加载头像
-        try {
-            BufferedImage image1,image2;
-            File avatar = new File(userInfos.get(0).getAvatarPath());
-            if (!avatar.exists()) {
-                image1 = ImageIO.read(new File("img.png"));
-            }else image1= ImageIO.read(avatar);
-            File avatar2 = new File(userInfos.get(1).getAvatarPath());
-            if (!avatar2.exists()) {
-                image2 = ImageIO.read(new File("img.png"));
-            }else image2= ImageIO.read(avatar2);
-            view.setAvatar(image1, image2);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        BufferedImage image1=chatMessageService.getAvatar(userInfos.get(0).getAvatarPath());
+        BufferedImage image2=chatMessageService.getAvatar(userInfos.get(1).getAvatarPath());
+        view.setAvatar(image1,image2);
         //加载本地数据
         List<SingleChatMessage>singleChatMessages=chatMessageService.getSingleChatTextMessage(senderId,receiverId);
-
         for(SingleChatMessage singleChatMessage:singleChatMessages){
             view.addMessage(singleChatMessage);
         }
-
         view.revalidate();
         view.repaint();
     }
 
     @Override
     public void sendMessage(SingleChatMessage content) {
-        SingleChatRequestMessage singleChatRequestMessage = null;
-        if(content.getType().equals("text")){
-            singleChatRequestMessage=new SingleChatTextRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),(String) content.getContent());
-            MessageCache.getChatListController().updatePreview(content.getReceiverID(), (String) content.getContent());
-        }
-        else if(content.getType().equals("image")){
-
-            singleChatRequestMessage=new SingleChatImageRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),(byte[])content.getContent());
-            MessageCache.getChatListController().updatePreview(content.getReceiverID(),"[图片]");
-        }
-
-        if(ctx!=null&&singleChatRequestMessage!=null){
-      //      MessageCache.addMessageCache(singleChatRequestMessage.getSequenceId(),content);
-            //这里应该响应后再SENT
-            content.changeSendStatus(Message.SENT);
-            ctx.writeAndFlush(singleChatRequestMessage);
-            log.debug("HERE SEND MESSAGE"+singleChatRequestMessage.getMessageType());
-        }else
-            if(singleChatRequestMessage!=null){
-            Timer timer = new Timer();
-            TimerTask task = new TimerTask() {
-                Integer count=0;
-                @Override
-                public void run() {
-                    if(count==5&&ctx==null){
-                        content.changeSendStatus(Message.FAILED);
-                        timer.cancel();
-                    }
-                    else if(ctx!=null){
-                        content.changeSendStatus(Message.SENT);
-                        ctx.writeAndFlush(content);
-                        timer.cancel();
-                    }
-                    ++count;
-                }
-            };
-            timer.scheduleAtFixedRate(task, 0, 1000);
-        }
+        chatMessageService.sendMessage(content,ctx);
     }
 
     @Override
@@ -132,7 +68,7 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
             view.setStatusLabel("未知");
         }
         //有网就向服务器发请求
-        else ctx.writeAndFlush(new LoginStatusRequestMessage(receiverId));
+        else chatMessageService.getLoginStatus(receiverId,ctx);
     }
 
     @Override

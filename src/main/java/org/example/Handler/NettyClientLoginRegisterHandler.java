@@ -1,7 +1,6 @@
 package org.example.Handler;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.example.Cache.MessageCache;
 import org.example.Controller.LoginController;
@@ -13,11 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 
-public class NettyClientLoginRegister extends SimpleChannelInboundHandler<LoginRequestResponseMessage> {
-    private static final Logger log = LoggerFactory.getLogger(NettyClientLoginRegister.class);
+public class NettyClientLoginRegisterHandler extends SimpleChannelInboundHandler<LoginRequestResponseMessage> {
+    private static final Logger log = LoggerFactory.getLogger(NettyClientLoginRegisterHandler.class);
     private LoginController loginController;
 
-    public NettyClientLoginRegister(LoginController loginController) {
+    public NettyClientLoginRegisterHandler(LoginController loginController) {
         this.loginController = loginController;
     }
     @Override

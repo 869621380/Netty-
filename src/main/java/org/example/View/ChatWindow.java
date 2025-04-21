@@ -1,15 +1,10 @@
 package org.example.View;
 
 import org.example.Model.Domain.SingleChatMessage;
-import org.example.Model.message.requestMessage.ChatRequestMessage;
-import org.example.Model.message.requestMessage.SingleChatRequestMessage;
-import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;

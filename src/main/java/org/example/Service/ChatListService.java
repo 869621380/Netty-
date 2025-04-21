@@ -7,7 +7,7 @@ import org.example.Util.MyBatisUtil;
 import java.util.List;
 
 public class ChatListService {
-    private ChatListMapper chatListMapper;
+    private final ChatListMapper chatListMapper;
     public ChatListService() {
         this.chatListMapper= MyBatisUtil.chatListMapper;
     }

@@ -19,14 +19,6 @@ public abstract class Config {
         }
     }
 
-    public static int getServerPort() {
-        String value = properties.getProperty("server.port");
-        if(value == null) {
-            return 8080;
-        } else {
-            return Integer.parseInt(value);
-        }
-    }
 
 
     public static Serializer.Algorithm getSerializerAlgorithm() {

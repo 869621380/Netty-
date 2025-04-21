@@ -1,10 +1,6 @@
 package org.example.View;
 
 import org.example.Model.Domain.SingleChatMessage;
-import org.example.Model.message.requestMessage.ChatRequestMessage;
-import org.example.Model.message.Message;
-import org.example.Model.message.requestMessage.SingleChatRequestMessage;
-import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
 import org.example.Util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,15 +8,12 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 

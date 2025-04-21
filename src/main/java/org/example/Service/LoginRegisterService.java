@@ -1,7 +1,6 @@
 package org.example.Service;
 
 import io.netty.channel.ChannelHandlerContext;
-import org.example.Model.message.requestMessage.LoginAndRegisterRequestMessage;
 import org.example.Model.message.requestMessage.LoginRequestMessage;
 import org.example.Model.message.requestMessage.RegisterRequestMessage;
 import org.example.View.LoginView;

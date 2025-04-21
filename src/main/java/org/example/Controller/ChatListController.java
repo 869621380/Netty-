@@ -4,7 +4,6 @@ import io.netty.channel.ChannelHandlerContext;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.Model.Domain.ChatItem;
-import org.example.Model.Domain.SingleChatMessage;
 import org.example.Service.ChatListService;
 import org.example.Util.ThreadPoolManager;
 import org.example.View.ChatListPanel;

@@ -1,6 +1,7 @@
 package org.example.Controller;
 
 import io.netty.channel.ChannelHandlerContext;
+import lombok.Getter;
 import lombok.Setter;
 import org.example.Model.message.requestMessage.LoginAndRegisterRequestMessage;
 import org.example.Model.message.requestMessage.LoginRequestMessage;
@@ -11,16 +12,21 @@ import org.example.View.LoginView;
 
 public class LoginController implements LoginView.LoginMessageListener {
     private final LoginView view;
-
+    @Getter
+    @Setter
+    private static String token=null;
     LoginRegisterService loginRegisterService;
     @Setter
     ChannelHandlerContext ctx;
     public LoginController(LoginView view) {
         ctx=null;
+        token=null;
         this.view = view;
         loginRegisterService=new LoginRegisterService(view);
         view.setLoginMessageListener(this);
     }
+
+
 
 
     public void showMessage(String message) {
@@ -64,5 +70,8 @@ public class LoginController implements LoginView.LoginMessageListener {
     public void closeLoginView(){
         view.dispose();
     }
+
+
+
 
 }

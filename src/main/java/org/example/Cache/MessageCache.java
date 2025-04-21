@@ -6,6 +6,7 @@ import org.example.Controller.ChatListController;
 import org.example.Controller.ChatWindowMessageController;
 import org.example.Model.Domain.Message;
 import org.example.Model.Domain.SingleChatMessage;
+import org.example.View.MainFrame;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,5 +30,9 @@ public class MessageCache {
     public static Map<Integer, ChatWindowMessageController>GetChatWindowMessageControllerMap(){
         return chatWindowMessageControllerMap;
     }
+
+    @Setter
+    @Getter
+    private static MainFrame mainFrameCache;
 
 }

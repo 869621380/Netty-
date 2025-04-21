@@ -2,13 +2,17 @@ package org.example.View;
 
 
 import io.netty.channel.ChannelHandlerContext;
+import lombok.Getter;
 import org.example.Cache.MessageCache;
 import org.example.Controller.ChatListController;
 import org.example.Controller.ChatWindowMessageController;
+import org.example.Util.ThreadPoolManager;
 import org.example.View.ChatWindow;
 import org.example.View.ChatListPanel;
 
 import javax.swing.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,10 +26,19 @@ public class MainFrame extends JFrame {
     private ChatListController chatListController;
     private Map<Integer,ChatWindow> chatWindowMap;
     private Map<Integer,ChatWindowMessageController>chatWindowMessageControllerMap;
+    //是否联网
+    @Getter
+    boolean isCtx;
     private ChatWindow currentWindow;
     public MainFrame(Integer userId) {
         setTitle("Main Frame");
-        LocalDateTime now = LocalDateTime.now();
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                chatListController.closeCtx();
+                super.windowClosing(e);
+            }
+        });
         setSize(925,650);
         setLayout(null);
         setVisible(true);
@@ -52,9 +65,6 @@ public class MainFrame extends JFrame {
             revalidate();
             repaint();
         }).start();
-        LocalDateTime now2 = LocalDateTime.now();
-        Duration duration = Duration.between(now2,now);
-        System.out.println(duration.toMillis());
 
 
     }
@@ -67,17 +77,24 @@ public class MainFrame extends JFrame {
     }
 
     public void addCtx(ChannelHandlerContext ctx){
+        isCtx=true;
         chatListController.setCtx(ctx);
-        new Thread(()-> {
+        ThreadPoolManager.getDBExecutorService().execute(() -> {
             try {
                 chatListController.getLatch().await();
                 for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
                     entry.getValue().setCtx(ctx);
                 }
             }catch(InterruptedException e){}
-        }).start();
+        });
+    }
 
-
+    public void removeCtx(){
+        isCtx=false;
+        chatListController.setCtx(null);
+        for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
+            entry.getValue().setCtx(null);
+        }
     }
 }
 

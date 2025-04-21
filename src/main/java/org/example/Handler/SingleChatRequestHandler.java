@@ -9,6 +9,7 @@ import org.example.Model.Domain.SingleChatMessage;
 import org.example.Model.message.requestMessage.SingleChatImageRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
+import org.example.View.MainFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +42,25 @@ public class SingleChatRequestHandler extends SimpleChannelInboundHandler<Single
             MessageCache.getChatListController().updatePreview(singleChatMessage.getSenderID(),"[图片]");
         }
         chatWindowMessageController.receiveMessage(singleChatMessage);
-
     }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        log.debug("channelInactive method called");
+        MainFrame mainFrame=MessageCache.getMainFrameCache();
+        if(mainFrame!=null&&!mainFrame.isCtx()){
+            mainFrame.addCtx(ctx);
+        }
+        log.debug("添加连接");
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        log.debug("channelInactive method called");
+        MainFrame mainFrame=MessageCache.getMainFrameCache();
+        if(mainFrame!=null&&mainFrame.isCtx()){
+            mainFrame.removeCtx();
+        }
+    }
+
 }

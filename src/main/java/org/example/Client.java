@@ -1,4 +1,4 @@
-package org.example.Client;
+package org.example;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -9,18 +9,23 @@ import io.netty.handler.timeout.IdleStateHandler;
 import org.example.Controller.LoginController;
 import org.example.Handler.HeartbeatAndPongHandler;
 
+import org.example.Handler.LoginStatusResponseHandler;
 import org.example.Handler.NettyClientLoginRegister;
 import org.example.Handler.SingleChatRequestHandler;
-import org.example.Model.message.responseMessage.LoginRequestResponseMessage;
+import org.example.Model.message.IdentityVerifyMessage;
 import org.example.Model.proto.MessageCodec;
 import org.example.Model.proto.ProtoFrameDecoder;
+
 import org.example.View.LoginView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.example.Util.Constants.SERVER_HOST;
+import static org.example.Util.Constants.SERVER_PORT;
+
 public class Client {
     private static final Logger log = LoggerFactory.getLogger(Client.class);
-    private static final String SERVER_HOST = "localhost";
-    private static final int SERVER_PORT = 8080;
+
     private static final int RECONNECT_DELAY = 1; // 重连间隔时间（秒）
 
     public static void main(String[] args) {
@@ -37,8 +42,9 @@ public class Client {
                 ch.pipeline().addLast(new ProtoFrameDecoder());
                 ch.pipeline().addLast(new MessageCodec());
                 ch.pipeline().addLast(new HeartbeatAndPongHandler());
-
                 ch.pipeline().addLast(new NettyClientLoginRegister(loginController));
+                //获取用户在线信息
+                ch.pipeline().addLast(new LoginStatusResponseHandler());
                 ch.pipeline().addLast(new SingleChatRequestHandler());
             }
         });
@@ -59,6 +65,13 @@ public class Client {
             if (future.isSuccess()) {
                 log.info("Connected to server: {}:{}", host, port);
                 Channel channel = future.channel();
+                // 获取存储的身份标识
+                String token = LoginController.getToken();
+                if (token!= null) {
+                    // 发送身份标识给服务器进行验证
+                    IdentityVerifyMessage identityVerifyMessage = new IdentityVerifyMessage(token);
+                    channel.writeAndFlush(identityVerifyMessage);
+                }
                 channel.closeFuture().addListener((ChannelFutureListener) closeFuture -> {
                     log.info("Connection closed, trying to reconnect...");
                     scheduleReconnect(bootstrap, host, port, group);

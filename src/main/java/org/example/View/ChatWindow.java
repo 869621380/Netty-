@@ -167,6 +167,7 @@ public class ChatWindow extends JLabel {
         this.listener = listener;
         if(listener != null) {
             listener.setInitData(senderId, receiverId);
+            listener.getReceiverLoginStatus(receiverId);
             SwingUtilities.invokeLater(() -> {
                 JScrollBar vertical = scrollPane.getVerticalScrollBar();
                 vertical.setValue(vertical.getMaximum());
@@ -297,5 +298,15 @@ public class ChatWindow extends JLabel {
     public interface ChatMessageListener {
         void setInitData(Integer senderId,Integer receiverId);
         void sendMessage(SingleChatMessage content);
+        void flushLoginStatus(Integer receiverId);
+        void getReceiverLoginStatus(Integer receiverId);
+    }
+
+    @Override
+    public void setVisible(boolean aFlag) {
+        super.setVisible(aFlag);
+        if (aFlag&&listener!=null) {
+            listener.flushLoginStatus(receiverId);
+        }
     }
 }

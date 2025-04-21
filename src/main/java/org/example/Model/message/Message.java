@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.Model.message.requestMessage.*;
 import org.example.Model.message.responseMessage.LoginRequestResponseMessage;
+import org.example.Model.message.responseMessage.LoginStatusResponseMessage;
+import org.example.Model.message.responseMessage.RegisterRequestResponseMessage;
+import org.example.Model.message.responseMessage.RequestResponseMessage;
 import org.example.Util.SequenceIdUtil;
 
 import java.io.Serializable;
@@ -36,6 +39,9 @@ public abstract class Message implements Serializable {
     public static final int LoginResponseEvent = 1;
     public static final int RegisterRequestEvent = 2;
     public static final int RegisterResponseEvent = 3;
+    public static final int LoginStatusRequestMessage=4;
+    public static final int LoginStatusResponseMessage=5;
+
 
     public static final int SingleTextRequestMessage=10;
     public static final int SingleImageRequestMessage = 11;
@@ -47,6 +53,9 @@ public abstract class Message implements Serializable {
     public static final int GroupVideoMessage = 42;
     public static final int GroupFileMessage = 43;
 
+    public static final int IdentityVerifyMessage=110;
+ //   public static final int IdentityVerifyResponseMessage=111;
+
     public static final int PingMessage=126;
     public static final int PongMessage=127;
 
@@ -55,12 +64,18 @@ public abstract class Message implements Serializable {
     static {
         messageClasses.put(LoginRequestEvent, LoginRequestMessage.class);
         messageClasses.put(LoginResponseEvent, LoginRequestResponseMessage.class);
+        messageClasses.put(RegisterRequestEvent, RegisterRequestMessage.class);
+        messageClasses.put(RegisterResponseEvent, RegisterRequestResponseMessage.class);
+        messageClasses.put(LoginStatusRequestMessage, LoginStatusRequestMessage.class);
+        messageClasses.put(LoginStatusResponseMessage, LoginStatusResponseMessage.class);
         messageClasses.put(SingleTextRequestMessage, SingleChatTextRequestMessage.class);
         messageClasses.put(SingleImageRequestMessage, SingleChatImageRequestMessage.class);
         messageClasses.put(SingleVideoRequestMessage, SingleChatVideoRequestMessage.class);
         messageClasses.put(SingleFileRequestMessage, SingleChatFileRequestMessage.class);
+        messageClasses.put(IdentityVerifyMessage, IdentityVerifyMessage.class);
         messageClasses.put(PingMessage, PingMessage.class);
         messageClasses.put(PongMessage, PongMessage.class);
+
     }
 
 

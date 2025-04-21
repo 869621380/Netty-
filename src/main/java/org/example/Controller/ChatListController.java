@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.example.Model.Domain.ChatItem;
 import org.example.Model.Domain.SingleChatMessage;
 import org.example.Service.ChatListService;
+import org.example.Util.ThreadPoolManager;
 import org.example.View.ChatListPanel;
 
 import java.util.List;
@@ -30,10 +31,11 @@ public class ChatListController implements ChatListPanel.ChatListListener {
         view.addChatItem(chatItems);
         view.revalidate();
         view.repaint();
-        new Thread(()-> {
+        ThreadPoolManager.getDBExecutorService().execute(() -> {
             view.addChatWindow(chatItems);
             latch.countDown();
-        }).start();
+        });
+
     }
 
     public void updatePreview(Integer receiverId,String content) {
@@ -43,4 +45,9 @@ public class ChatListController implements ChatListPanel.ChatListListener {
         view.repaint();
     }
 
+    public void closeCtx() {
+        if(ctx!=null) {
+            ctx.close();
+        }
+    }
 }

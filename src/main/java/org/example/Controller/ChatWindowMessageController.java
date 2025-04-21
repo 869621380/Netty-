@@ -6,11 +6,13 @@ import org.example.Cache.MessageCache;
 import org.example.Model.Domain.Message;
 import org.example.Model.Domain.SingleChatMessage;
 import org.example.Model.Domain.UserInfo;
+import org.example.Model.message.requestMessage.LoginStatusRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatImageRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
 import org.example.Service.ChatMessageService;
 import org.example.Service.UserInfoService;
+import org.example.Util.ThreadPoolManager;
 import org.example.View.ChatWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +24,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class ChatWindowMessageController implements ChatWindow.ChatMessageListener {
 
@@ -92,21 +94,65 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
         else if(content.getType().equals("image")){
 
             singleChatRequestMessage=new SingleChatImageRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),(byte[])content.getContent());
-            log.debug("HERE WILL SEND IMAGE");
             MessageCache.getChatListController().updatePreview(content.getReceiverID(),"[图片]");
         }
 
         if(ctx!=null&&singleChatRequestMessage!=null){
-            MessageCache.addMessageCache(singleChatRequestMessage.getSequenceId(),content);
+      //      MessageCache.addMessageCache(singleChatRequestMessage.getSequenceId(),content);
             //这里应该响应后再SENT
             content.changeSendStatus(Message.SENT);
             ctx.writeAndFlush(singleChatRequestMessage);
             log.debug("HERE SEND MESSAGE"+singleChatRequestMessage.getMessageType());
+        }else
+            if(singleChatRequestMessage!=null){
+            Timer timer = new Timer();
+            TimerTask task = new TimerTask() {
+                Integer count=0;
+                @Override
+                public void run() {
+                    if(count==5&&ctx==null){
+                        content.changeSendStatus(Message.FAILED);
+                        timer.cancel();
+                    }
+                    else if(ctx!=null){
+                        content.changeSendStatus(Message.SENT);
+                        ctx.writeAndFlush(content);
+                        timer.cancel();
+                    }
+                    ++count;
+                }
+            };
+            timer.scheduleAtFixedRate(task, 0, 1000);
         }
+    }
+
+    @Override
+    public void flushLoginStatus(Integer receiverId) {
+        if(ctx==null){
+            view.setStatusLabel("未知");
+        }
+        //有网就向服务器发请求
+        else ctx.writeAndFlush(new LoginStatusRequestMessage(receiverId));
+    }
+
+    @Override
+    public void getReceiverLoginStatus(Integer receiverId) {
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                flushLoginStatus(receiverId);
+            }
+        };
+        timer.scheduleAtFixedRate(task, 0, 10000);
     }
 
     public void receiveMessage(SingleChatMessage singleChatMessage) {
         view.addMessage(singleChatMessage);
+    }
+
+    public void setLoginStatus(String loginStatus) {
+        view.setStatusLabel(loginStatus);
     }
 
 

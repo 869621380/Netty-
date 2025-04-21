@@ -3,9 +3,10 @@ package org.example.Handler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.example.Cache.MessageCache;
 import org.example.Controller.LoginController;
 import org.example.Model.message.responseMessage.LoginRequestResponseMessage;
-import org.example.Server.Handler.LoginRequestMessageHandler;
+
 import org.example.View.MainFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +26,13 @@ public class NettyClientLoginRegister extends SimpleChannelInboundHandler<LoginR
         LoginRequestResponseMessage response = (LoginRequestResponseMessage) msg;
         log.debug("response: {}", response);
         if(response.isSuccess()){
+            LoginController.setToken(response.getToken());
             loginController.closeLoginView();
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    MainFrame mainFrame=new MainFrame(Integer.parseInt(response.getReason()));
-                    mainFrame.setVisible(true);
-
-                    mainFrame.addCtx(ctx);
-                }
+            SwingUtilities.invokeLater(() -> {
+                MainFrame mainFrame=new MainFrame(Integer.parseInt(response.getReason()));
+                MessageCache.setMainFrameCache(mainFrame);
+                mainFrame.setVisible(true);
+                mainFrame.addCtx(ctx);
             });
 
         }
@@ -43,15 +43,19 @@ public class NettyClientLoginRegister extends SimpleChannelInboundHandler<LoginR
     // 在连接建立后触发 active 事件
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        log.debug("登录连接建立");
         // 负责接收用户在控制台的输入，负责向服务器发送各种消息
         loginController.setCtx(ctx);
+        ctx.fireChannelActive();
     }
 
     // 在连接断开时触发
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+
         loginController.setCtx(null);
         log.debug("登录连接已经断开");
+        ctx.fireChannelInactive();
     }
 
     // 在出现异常时触发

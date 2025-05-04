@@ -61,6 +61,7 @@ public class MessagePanel extends JPanel implements ActionListener {
         statusLabel = new JLabel();
         statusLabel.setFont(new Font("Microsoft YaHei", Font.PLAIN, 10)); // Windows
         if (isSelf) {
+            System.out.println("status:::"+content.getSendStatus());
             setStatus(content.getSendStatus()); // 默认状态
             add(statusLabel);
         }

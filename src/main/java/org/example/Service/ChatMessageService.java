@@ -3,6 +3,7 @@ package org.example.Service;
 import io.netty.channel.ChannelHandlerContext;
 import org.example.Cache.MessageCache;
 import org.example.Dao.ChatMessageMapper;
+import org.example.Dao.Private_chat_recordsMapper;
 import org.example.Model.Domain.Message;
 import org.example.Model.Domain.SingleChatMessage;
 import org.example.Model.message.requestMessage.LoginStatusRequestMessage;
@@ -10,6 +11,7 @@ import org.example.Model.message.requestMessage.SingleChatImageRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
 import org.example.Util.MyBatisUtil;
+import org.example.entity.private_chat_records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,9 +27,11 @@ public class ChatMessageService {
     private static final Logger log = LoggerFactory.getLogger(ChatMessageService.class);
 
     ChatMessageMapper chatMessageMapper;
+    Private_chat_recordsMapper private_chat_recordsMapper;
+    ;
     public ChatMessageService() {
         chatMessageMapper= MyBatisUtil.chatMessageMapper;
-
+        private_chat_recordsMapper=MyBatisUtil.private_chat_recordsMapper;
     }
 
     /**
@@ -37,10 +41,18 @@ public class ChatMessageService {
      * @return 双方聊天消息
      */
     public List<SingleChatMessage> getSingleChatTextMessage(Integer senderId, Integer receiverId){
-        return chatMessageMapper.getSingleChatMessage(senderId,receiverId);
+
+        //return chatMessageMapper.getSingleChatMessage(senderId,receiverId);
+
+        return private_chat_recordsMapper.selectMessagesBySenderAndReceiver(senderId,receiverId);
+
     }
 
     public void sendMessage(SingleChatMessage content,ChannelHandlerContext ctx){
+        //本地存储
+        int result=private_chat_recordsMapper.insertSingleMessage(content.getSenderID(),content.getReceiverID(),content.getContent());
+
+        System.out.println("success:"+result);
         SingleChatRequestMessage singleChatRequestMessage = null;
         if(content.getType().equals("text")){
             singleChatRequestMessage=new SingleChatTextRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),(String) content.getContent());
@@ -78,6 +90,7 @@ public class ChatMessageService {
             };
             timer.scheduleAtFixedRate(task, 0, 1000);
         }
+
     }
 
     public void getLoginStatus(Integer receiverId, ChannelHandlerContext ctx) {

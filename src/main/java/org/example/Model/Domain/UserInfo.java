@@ -17,7 +17,7 @@ public class UserInfo {
     //用户名
     private String nickname;
     //头像路径
-    private String avatarPath;
+    private String avatarPath="img.png";
     //邮箱
     private String email;
     //账号创建时间

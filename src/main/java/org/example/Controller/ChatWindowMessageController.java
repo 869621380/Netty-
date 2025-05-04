@@ -40,8 +40,9 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
 
     @Override
     public void setInitData(Integer senderId, Integer receiverId) {
-
+        System.out.println("发送人和接收人ID："+senderId+"  "+receiverId);
         List<UserInfo>userInfos= userInfoService.getUserAvatar(senderId, receiverId);
+        System.out.println(userInfos);
         view.setReceiverNameLabel(userInfos.get(1).getNickname());
         view.setStatusLabel("未知");
         //加载头像

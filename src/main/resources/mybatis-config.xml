@@ -15,10 +15,10 @@
         <environment id="development">
             <transactionManager type="JDBC"/>
             <dataSource type="POOLED">
-                <property name="driver" value="${DB_DRIVER}"/>
-                <property name="url" value="${DB_URL}"/>
-                <property name="username" value="${DB_USERNAME}"/>
-                <property name="password" value="${DB_PASSWORD}"/>
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/friendships"/>
+                <property name="username" value="root"/>
+                <property name="password" value="123456"/>
             </dataSource>
         </environment>
     </environments>

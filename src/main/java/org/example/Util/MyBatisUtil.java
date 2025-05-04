@@ -3,9 +3,7 @@ package org.example.Util;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.example.Dao.ChatListMapper;
-import org.example.Dao.ChatMessageMapper;
-import org.example.Dao.UserInfoMapper;
+import org.example.Dao.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +15,9 @@ public class MyBatisUtil {
     public static UserInfoMapper userInfoMapper;
     public static ChatMessageMapper chatMessageMapper;
     public static ChatListMapper chatListMapper;
+    public static UserMapper userMapper;
+    public static FriendshipsMapper friendshipsMapper;
+    public static Private_chat_recordsMapper private_chat_recordsMapper;
     static {
         try {
             String resource = Constants.MYBATIS_XML_Path;
@@ -25,6 +26,9 @@ public class MyBatisUtil {
             userInfoMapper=sqlSessionFactory.openSession().getMapper(UserInfoMapper.class);
             chatMessageMapper=sqlSessionFactory.openSession().getMapper(ChatMessageMapper.class);
             chatListMapper=sqlSessionFactory.openSession().getMapper(ChatListMapper.class);
+            userMapper=sqlSessionFactory.openSession().getMapper(UserMapper.class);
+            friendshipsMapper=sqlSessionFactory.openSession().getMapper(FriendshipsMapper.class);
+            private_chat_recordsMapper=sqlSessionFactory.openSession(true).getMapper(Private_chat_recordsMapper.class);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
@@ -33,4 +37,5 @@ public class MyBatisUtil {
     public static SqlSession getSqlSession() {
         return sqlSessionFactory.openSession();
     }
+
 }

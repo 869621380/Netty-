@@ -1,6 +1,7 @@
 package org.example.View;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.example.Controller.ChatWindowMessageController;
 import org.example.Model.Domain.ChatItem;
 import org.example.Util.Constants;
@@ -35,21 +36,32 @@ public class ChatListPanel extends JPanel {
     @Getter
     private Map<Integer,ChatWindow> chatWindowMap;
     @Getter
+    @Setter
     List<ChatWindow> chatWindowList;
+
+    public void setCurrentChatWindow(ChatWindow currentChatWindow) {
+        this.currentChatWindow = currentChatWindow;
+    }
+
+    public ChatWindow getCurrentChatWindow() {
+        return currentChatWindow;
+    }
+
     ChatWindow currentChatWindow;
     @Getter
     Map<Integer,ChatWindowMessageController>chatWindowMessageControllerMap;
-//    ChatWindowMessageController chatWindowMessageController;
+    //    ChatWindowMessageController chatWindowMessageController;
     // 图片缓存
     private static final Map<String, Image> imageCache = new HashMap<>();
 
     //监听器
     private ChatListListener listener;
 
+    private CreateGroupListener createGroupListener;
 
     public ChatListPanel(Integer userId) {
         this.userId = userId;
-      //  chatWindowMessageController=new ChatWindowMessageController(null);
+        //  chatWindowMessageController=new ChatWindowMessageController(null);
         chatWindowMessageControllerMap = new HashMap<>();
         try {
             BufferedImage original = ImageIO.read(new File(Constants.DEFAULT_AVATAR));
@@ -70,6 +82,24 @@ public class ChatListPanel extends JPanel {
 
     void InitLayout() {
         setLayout(new BorderLayout());
+
+        // 添加顶部工具栏
+        JToolBar toolBar = new JToolBar();
+        toolBar.setFloatable(false);
+        toolBar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        // 创建群聊按钮
+        JButton createGroupBtn = new JButton("创建群聊");
+        createGroupBtn.setFont(new Font("微软雅黑", Font.PLAIN, 14));
+        createGroupBtn.setFocusPainted(false);
+        createGroupBtn.addActionListener(e -> {
+            if (createGroupListener != null) {
+                createGroupListener.onCreateGroupRequested(userId);
+            }
+        });
+        toolBar.add(createGroupBtn);
+        add(toolBar, BorderLayout.NORTH);
+
         listModel = new DefaultListModel<>();
         list = new JList<>(listModel);
         list.setCellRenderer(new ChatItemRenderer());
@@ -83,8 +113,8 @@ public class ChatListPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 int index = list.locationToIndex(e.getPoint());
                 if (index >= 0) {
-                    listModel.getElementAt(index).setUnreadCount(0);
-              //      ChatItem item = list.getModel().getElementAt(index);
+                    listModel.getElementAt(index).setUnreadCount(0); //点击时将未读消息数设为0
+                    //      ChatItem item = list.getModel().getElementAt(index);
                     ChatWindow chatWindow = chatWindowMap.get(list.getModel().getElementAt(index).getReceiverId());
                     if(currentChatWindow==null){
                         currentChatWindow = chatWindow;
@@ -108,12 +138,17 @@ public class ChatListPanel extends JPanel {
 
     }
 
-
+    //设定chatlistListener监听器，调用setInitData，传入用户id
     public void setChatListener(ChatListListener listener) {
         this.listener = listener;
         if(listener != null) {
             listener.setInitData(userId);
         }
+    }
+
+    // 设置群聊创建监听器
+    public void setCreateGroupListener(CreateGroupListener listener) {
+        this.createGroupListener = listener;
     }
 
     public void updateItem(Integer receiverId,String content) {
@@ -128,7 +163,8 @@ public class ChatListPanel extends JPanel {
     }
 
 
-    private static class ChatItemRenderer extends JPanel implements ListCellRenderer<ChatItem> {
+
+    static class ChatItemRenderer extends JPanel implements ListCellRenderer<ChatItem> {
         private final JLabel iconLabel = new JLabel();
         private final JLabel titleLabel = new JLabel();
         private final JLabel timeLabel = new JLabel();
@@ -270,18 +306,21 @@ public class ChatListPanel extends JPanel {
         void setInitData(Integer userId);
 
     }
-
+    // 添加群聊创建监听器接口
+    public interface CreateGroupListener {
+        void onCreateGroupRequested(Integer userId);
+    }
     public void addChatWindow(List<ChatItem>chatItems) {
 
         for(ChatItem chatItem:chatItems){
             ChatWindow chatWindow=new ChatWindow(userId,chatItem.getReceiverId());
             chatWindowMap.put(chatItem.getReceiverId(),chatWindow);
-          //  chatWindowMessageController.setView(chatWindow);
+            //  chatWindowMessageController.setView(chatWindow);
             ChatWindowMessageController chatWindowMessageController=new ChatWindowMessageController(chatWindow);
             chatWindowMessageControllerMap.put(chatItem.getReceiverId(),chatWindowMessageController);
             chatWindow.setVisible(false);
         }
-       // chatWindowMessageController.setView(null);
+        // chatWindowMessageController.setView(null);
     }
 
 }

@@ -277,6 +277,7 @@ public class ChatWindow extends JLabel {
         ImageIO.write(image, "png", baos);
         return baos.toByteArray();
     }
+    //发送消息逻辑，新增本地花存储
     private void sendMessage(){
         if(listener!=null) {
             SingleChatMessage singleChatMessage =

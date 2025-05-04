@@ -50,18 +50,19 @@ public class ChatMessageService {
 
     public void sendMessage(SingleChatMessage content,ChannelHandlerContext ctx){
         //本地存储
-        int result=private_chat_recordsMapper.insertSingleMessage(content.getSenderID(),content.getReceiverID(),content.getContent());
 
-        System.out.println("success:"+result);
         SingleChatRequestMessage singleChatRequestMessage = null;
         if(content.getType().equals("text")){
             singleChatRequestMessage=new SingleChatTextRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),(String) content.getContent());
             MessageCache.getChatListController().updatePreview(content.getReceiverID(), (String) content.getContent());
+            int result=private_chat_recordsMapper.insertSingleMessage(content.getSenderID(),content.getReceiverID(),content.getContent());
+            System.out.println("success:"+result);
         }
         else if(content.getType().equals("image")){
 
             singleChatRequestMessage=new SingleChatImageRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),(byte[])content.getContent());
             MessageCache.getChatListController().updatePreview(content.getReceiverID(),"[图片]");
+
         }
 
         if(ctx!=null&&singleChatRequestMessage!=null){

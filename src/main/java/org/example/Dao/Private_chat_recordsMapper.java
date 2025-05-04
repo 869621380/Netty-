@@ -39,6 +39,5 @@ public interface Private_chat_recordsMapper extends BaseMapper<private_chat_reco
 
     @Insert("INSERT INTO private_chat_records (sender_id, receiver_id, message) " +
             "VALUES (#{sender_id}, #{receiver_id},#{message} ); ")
-
     int insertSingleMessage(@Param("sender_id")int sender_id, @Param("receiver_id") int receiver_id, @Param("message") Object message);
 }

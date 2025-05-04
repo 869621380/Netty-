@@ -39,7 +39,9 @@ public class ChatListController implements ChatListPanel.ChatListListener,
         view.revalidate();
         view.repaint();
         ThreadPoolManager.getDBExecutorService().execute(() -> {
-            view.addChatWindow(chatItems);
+            if(chatItems!=null)
+                view.addChatWindow(chatItems);
+
             latch.countDown();
         });
 

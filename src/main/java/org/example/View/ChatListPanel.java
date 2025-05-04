@@ -75,9 +75,12 @@ public class ChatListPanel extends JPanel {
     }
 
     public void addChatItem(List<ChatItem>chatItems){
-        for(ChatItem chatItem:chatItems){
-            listModel.addElement(chatItem);
+        if (chatItems!=null){
+            for(ChatItem chatItem:chatItems){
+                listModel.addElement(chatItem);
+            }
         }
+
     }
 
     void InitLayout() {
@@ -310,6 +313,7 @@ public class ChatListPanel extends JPanel {
     public interface CreateGroupListener {
         void onCreateGroupRequested(Integer userId);
     }
+
     public void addChatWindow(List<ChatItem>chatItems) {
 
         for(ChatItem chatItem:chatItems){

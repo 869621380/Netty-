@@ -304,4 +304,12 @@ public class ChatWindow extends JLabel {
             listener.flushLoginStatus(receiverId);
         }
     }
+
+    public Integer getSenderId() {
+        return senderId;
+    }
+
+    public Integer getReceiverId() {
+        return receiverId;
+    }
 }

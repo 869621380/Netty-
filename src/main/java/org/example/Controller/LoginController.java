@@ -41,12 +41,18 @@ public class LoginController implements LoginView.LoginMessageListener {
         if(event instanceof LoginRequestMessage loginRequestMessage) {
             if (loginRequestMessage.getUserId()==null || loginRequestMessage.getPassword().isEmpty()) {
                 view.showMessage("用户名或密码不能为空");
-            }else loginRegisterService.login(loginRequestMessage,ctx);
+            }else {
+                try {
+                    loginRegisterService.login(loginRequestMessage, ctx);
+                } catch (Exception e) {
+                    //log.error("登录请求发送失败", e);
+                    view.showMessage("登录请求发送失败：" + e.getMessage());
+                }
+            }
         }
         else if(event instanceof RegisterRequestMessage) {
-
+            // 处理注册请求逻辑
         }
-
     }
 
     @Override
@@ -70,8 +76,6 @@ public class LoginController implements LoginView.LoginMessageListener {
     public void closeLoginView(){
         view.dispose();
     }
-
-
 
 
 }

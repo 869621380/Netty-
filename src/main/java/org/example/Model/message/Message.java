@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.Model.message.requestMessage.*;
+import org.example.Model.message.responseMessage.FriendRequestResponseMessage;
+import org.example.Model.message.responseMessage.GroupCreateResponseMessage;
 import org.example.Model.message.responseMessage.LoginRequestResponseMessage;
 import org.example.Model.message.responseMessage.LoginStatusResponseMessage;
 import org.example.Model.message.responseMessage.RegisterRequestResponseMessage;
@@ -59,6 +61,20 @@ public abstract class Message implements Serializable {
     public static final int PingMessage=126;
     public static final int PongMessage=127;
 
+    //friend relationship
+    public static final int FriendRequest = 6;
+    // public static final int FriendAccept = 101;
+    // public static final int FriendReject = 102;
+    public static final int FriendRequestResponse = 7;
+    public static final int FriendListRequest = 8;
+    public static final int FriendListResponse = 9;
+
+    //groupRelationship
+    public static final int GroupCreateRequest = 20;
+    public static final int GroupCreateResponse = 21;
+    public static final int GroupListRequest = 22;
+    public static final int GroupListResponse = 23;
+
     private static final Map<Integer, Class<? extends Message>> messageClasses = new HashMap<>();
 
     static {
@@ -75,6 +91,12 @@ public abstract class Message implements Serializable {
         messageClasses.put(IdentityVerifyMessage, IdentityVerifyMessage.class);
         messageClasses.put(PingMessage, PingMessage.class);
         messageClasses.put(PongMessage, PongMessage.class);
+
+         // 添加新的消息类型映射
+        messageClasses.put(FriendRequest, FriendRequestMessage.class);
+        messageClasses.put(FriendRequestResponse, FriendRequestResponseMessage.class);
+        messageClasses.put(GroupCreateRequest, GroupCreateRequestMessage.class);
+        messageClasses.put(GroupCreateResponse, GroupCreateResponseMessage.class);
 
     }
 

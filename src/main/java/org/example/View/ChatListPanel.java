@@ -3,9 +3,11 @@ package org.example.View;
 import lombok.Getter;
 import org.example.Controller.ChatWindowMessageController;
 import org.example.Model.Domain.ChatItem;
+import org.example.Model.Domain.FriendInfo;
 import org.example.Util.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.example.Controller.ChatListController;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -284,4 +286,69 @@ public class ChatListPanel extends JPanel {
        // chatWindowMessageController.setView(null);
     }
 
+    /**
+     * 更新好友列表
+     * @param friendList 新的好友列表
+     */
+    public void updateFriendList(List<FriendInfo> friendList) {
+        if (friendList == null || friendList.isEmpty()) {
+            log.info("好友列表为空");
+            return;
+        }
+
+        log.info("更新好友列表: {} 个好友", friendList.size());
+
+        // 初始化聊天窗口映射，如果还没有初始化的话
+        if (chatWindowMap == null) {
+            chatWindowMap = new HashMap<>();
+        }
+
+        // 将好友列表转换为ChatItem并更新UI
+        for (FriendInfo friend : friendList) {
+            boolean exists = false;
+
+            // 检查现有列表中是否已经包含此好友
+            for (int i = 0; i < listModel.size(); i++) {
+                ChatItem item = listModel.getElementAt(i);
+                if (item.getReceiverId().equals(Integer.valueOf(friend.getFriendId()))) {
+                    // 已存在，可以更新其他信息如名称等
+                    item.setReceiverName(friend.getFriendNickName());
+                    if (friend.getFriendAvatar() != null && !friend.getFriendAvatar().isEmpty()) {
+                        item.setAvatarPath(friend.getFriendAvatar());
+                    }
+                    exists = true;
+                    break;
+                }
+            }
+
+            // 如果不存在，添加新的ChatItem
+            if (!exists) {
+                ChatItem newItem = new ChatItem();
+                newItem.setReceiverId(Integer.valueOf(friend.getFriendId()));
+                newItem.setReceiverName(friend.getFriendNickName());
+                newItem.setPreview(""); // 新好友没有聊天记录
+                newItem.setPreviewTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                newItem.setUnreadCount(0);
+
+                if (friend.getFriendAvatar() != null && !friend.getFriendAvatar().isEmpty()) {
+                    newItem.setAvatarPath(friend.getFriendAvatar());
+                } else {
+                    newItem.setAvatarPath(Constants.DEFAULT_AVATAR); // 使用默认头像
+                }
+
+                listModel.addElement(newItem);
+
+                // 创建新好友的聊天窗口
+                ChatWindow chatWindow = new ChatWindow(userId, Integer.valueOf(friend.getFriendId()));
+                chatWindowMap.put(Integer.valueOf(friend.getFriendId()), chatWindow);
+                ChatWindowMessageController chatWindowMessageController = new ChatWindowMessageController(chatWindow);
+                chatWindowMessageControllerMap.put(Integer.valueOf(friend.getFriendId()), chatWindowMessageController);
+                chatWindow.setVisible(false);
+            }
+        }
+
+        // 刷新UI
+        revalidate();
+        repaint();
+    }
 }

@@ -25,17 +25,34 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
     @Setter
     ChannelHandlerContext ctx;
 
+//    public ChatWindowMessageController(ChatWindow view) {
+//        ctx=null;
+//        this.view = view;
+//        chatMessageService=new ChatMessageService();
+//        userInfoService=new UserInfoService();
+//        if(view!=null) view.setChatWindowMessageListener(this);
+//    }
+//
+//    public void setView(ChatWindow view) {
+//        this.view=view;
+//        if(view!=null) view.setChatWindowMessageListener(this);
+//    }
+
     public ChatWindowMessageController(ChatWindow view) {
-        ctx=null;
+        ctx = null;
         this.view = view;
-        chatMessageService=new ChatMessageService();
-        userInfoService=new UserInfoService();
-        if(view!=null) view.setChatWindowMessageListener(this);
+        chatMessageService = new ChatMessageService();
+        userInfoService = new UserInfoService();
+        if(view != null) {
+            view.setChatWindowMessageListener(this);  // 此处缺失了调用方法
+        }
     }
 
     public void setView(ChatWindow view) {
-        this.view=view;
-        if(view!=null) view.setChatWindowMessageListener(this);
+        this.view = view;
+        if(view != null) {
+            view.setChatWindowMessageListener(this);  // 此处缺失了调用方法
+        }
     }
 
     @Override
@@ -91,5 +108,36 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
         view.setStatusLabel(loginStatus);
     }
 
+//    public void setCtx(ChannelHandlerContext ctx) {
+//        this.ctx = ctx;
+//
+//        // 当设置新的ctx时，如果窗口当前可见，自动刷新消息
+//        if (window != null && window.isVisible()) {
+//            loadMessages();
+//        }
+//
+//        logger.debug("已设置ChannelHandlerContext: {}", ctx != null);
+//    }
+
+    public void setCtx(ChannelHandlerContext ctx) {
+        this.ctx = ctx;
+
+        // 更新状态
+        if (view != null && view.isVisible() && ctx != null) {
+            // 获取接收者ID
+            try {
+                // 假设可以通过某种方式获取接收者ID
+                Integer receiverId = view.getReceiverId(); // 或通过其他方式获取
+                if (receiverId != null) {
+                    // 刷新登录状态
+                    flushLoginStatus(receiverId);
+                }
+            } catch (Exception e) {
+                log.error("刷新状态失败", e);
+            }
+        }
+
+        log.debug("已设置ChannelHandlerContext: {}", ctx != null);
+    }
 
 }

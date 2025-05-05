@@ -7,11 +7,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.example.Controller.LoginController;
-import org.example.Handler.HeartbeatAndPongHandler;
+import org.example.Handler.*;
 
-import org.example.Handler.LoginStatusResponseHandler;
-import org.example.Handler.NettyClientLoginRegisterHandler;
-import org.example.Handler.SingleChatRequestHandler;
 import org.example.Model.message.IdentityVerifyMessage;
 import org.example.Model.proto.MessageCodec;
 import org.example.Model.proto.ProtoFrameDecoder;
@@ -43,6 +40,7 @@ public class Client {
                 ch.pipeline().addLast(new MessageCodec());
                 ch.pipeline().addLast(new HeartbeatAndPongHandler());
                 ch.pipeline().addLast(new NettyClientLoginRegisterHandler(loginController));
+                ch.pipeline().addLast(new RegisterResponseHandler(loginController));
                 //获取用户在线信息
                 ch.pipeline().addLast(new LoginStatusResponseHandler());
                 ch.pipeline().addLast(new SingleChatRequestHandler());

@@ -2,12 +2,12 @@ package org.example.Model.message;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+
 import org.example.Model.message.requestMessage.*;
 import org.example.Model.message.responseMessage.LoginRequestResponseMessage;
 import org.example.Model.message.responseMessage.LoginStatusResponseMessage;
 import org.example.Model.message.responseMessage.RegisterRequestResponseMessage;
-import org.example.Model.message.responseMessage.RequestResponseMessage;
+
 import org.example.Util.SequenceIdUtil;
 
 import java.io.Serializable;
@@ -41,6 +41,8 @@ public abstract class Message implements Serializable {
     public static final int RegisterResponseEvent = 3;
     public static final int LoginStatusRequestMessage=4;
     public static final int LoginStatusResponseMessage=5;
+    public static final int RegisterCodeRequestMessage=6;
+
 
 
     public static final int SingleTextRequestMessage=10;
@@ -68,6 +70,7 @@ public abstract class Message implements Serializable {
         messageClasses.put(RegisterResponseEvent, RegisterRequestResponseMessage.class);
         messageClasses.put(LoginStatusRequestMessage, LoginStatusRequestMessage.class);
         messageClasses.put(LoginStatusResponseMessage, LoginStatusResponseMessage.class);
+        messageClasses.put(RegisterCodeRequestMessage, RegisterCodeRequestMessage.class);
         messageClasses.put(SingleTextRequestMessage, SingleChatTextRequestMessage.class);
         messageClasses.put(SingleImageRequestMessage, SingleChatImageRequestMessage.class);
         messageClasses.put(SingleVideoRequestMessage, SingleChatVideoRequestMessage.class);

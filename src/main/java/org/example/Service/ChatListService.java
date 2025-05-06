@@ -1,7 +1,10 @@
 package org.example.Service;
 
+import io.netty.channel.ChannelHandlerContext;
+import lombok.extern.slf4j.Slf4j;
 import org.example.Dao.*;
 import org.example.Model.Domain.ChatItem;
+import org.example.Model.message.InitOKMessage;
 import org.example.Util.MyBatisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Service("chatListService")
 public class ChatListService {
 //    private final ChatListMapper chatListMapper;
@@ -50,5 +54,12 @@ public class ChatListService {
         group.setAvatarPath("img.png"); // 需要定义这个常量
 
         return group;
+    }
+
+    public void sendInitMessage(Integer userId, ChannelHandlerContext ctx) {
+        InitOKMessage initOKMessage = new InitOKMessage();
+        initOKMessage.setUserId(userId);
+        ctx.writeAndFlush(initOKMessage);
+        log.debug("发送了离线数据请求");
     }
 }

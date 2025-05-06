@@ -21,6 +21,7 @@ public class ChatListController implements ChatListPanel.ChatListListener,
                                         ChatListPanel.CreateGroupListener  {
     private final ChatListPanel view;
     private final ChatListService chatListService;
+
     @Getter
     private CountDownLatch latch = new CountDownLatch(1);
     @Setter
@@ -120,4 +121,11 @@ public class ChatListController implements ChatListPanel.ChatListListener,
 
     }
 
+    public void sendInitMessage(Integer userId) {
+        if(ctx!=null) {
+            chatListService.sendInitMessage(userId, ctx);
+        }else{
+            System.out.println("ctx为空");
+        }
+    }
 }

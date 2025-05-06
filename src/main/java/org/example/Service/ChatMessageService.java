@@ -11,6 +11,7 @@ import org.example.Model.message.requestMessage.SingleChatImageRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatRequestMessage;
 import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
 import org.example.Util.MyBatisUtil;
+import org.example.Util.ThreadPoolManager;
 import org.example.entity.private_chat_records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +27,11 @@ import java.util.TimerTask;
 public class ChatMessageService {
     private static final Logger log = LoggerFactory.getLogger(ChatMessageService.class);
 
-    ChatMessageMapper chatMessageMapper;
+    //ChatMessageMapper chatMessageMapper;
     Private_chat_recordsMapper private_chat_recordsMapper;
-    ;
+
     public ChatMessageService() {
-        chatMessageMapper= MyBatisUtil.chatMessageMapper;
+      //  chatMessageMapper= MyBatisUtil.chatMessageMapper;
         private_chat_recordsMapper=MyBatisUtil.private_chat_recordsMapper;
     }
 
@@ -55,7 +56,7 @@ public class ChatMessageService {
         if(content.getType().equals("text")){
             singleChatRequestMessage=new SingleChatTextRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),(String) content.getContent());
             MessageCache.getChatListController().updatePreview(content.getReceiverID(), (String) content.getContent());
-            int result=private_chat_recordsMapper.insertSingleMessage(content.getSenderID(),content.getReceiverID(),content.getContent());
+            int result=private_chat_recordsMapper.insertSingleMessage(content.getSenderID(),content.getSenderID(),content.getReceiverID(),content.getContent());
             System.out.println("success:"+result);
         }
         else if(content.getType().equals("image")){
@@ -109,5 +110,19 @@ public class ChatMessageService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 将用户接收到的信息写入数据库
+     * @param masterId
+     * @param senderId
+     * @param receiverId
+     * @param content
+     */
+    public void persistentMessage(Integer masterId,Integer senderId,Integer receiverId,String content){
+
+        ThreadPoolManager.getDBExecutorService().execute(
+                ()->private_chat_recordsMapper.insertSingleMessage(masterId,senderId,receiverId,content)
+        );
     }
 }

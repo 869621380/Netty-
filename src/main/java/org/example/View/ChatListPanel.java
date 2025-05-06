@@ -122,6 +122,7 @@ public class ChatListPanel extends JPanel {
                     if(currentChatWindow==null){
                         currentChatWindow = chatWindow;
                         currentChatWindow.setVisible(true);
+                        currentChatWindow.moveToBottom();
                     }else if(currentChatWindow!=chatWindow){
                         currentChatWindow.setVisible(false);
                         currentChatWindow = chatWindow;

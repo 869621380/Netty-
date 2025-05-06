@@ -4,12 +4,15 @@ import io.netty.channel.ChannelHandlerContext;
 import lombok.Setter;
 import org.example.Model.Domain.SingleChatMessage;
 import org.example.Model.Domain.UserInfo;
+import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
 import org.example.Service.ChatMessageService;
 import org.example.Service.UserInfoService;
+import org.example.Util.ThreadPoolManager;
 import org.example.View.ChatWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Timer;
@@ -40,9 +43,9 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
 
     @Override
     public void setInitData(Integer senderId, Integer receiverId) {
-        System.out.println("发送人和接收人ID："+senderId+"  "+receiverId);
+
         List<UserInfo>userInfos= userInfoService.getUserAvatar(senderId, receiverId);
-        System.out.println(userInfos);
+
         view.setReceiverNameLabel(userInfos.get(1).getNickname());
         view.setStatusLabel("未知");
         //加载头像
@@ -84,8 +87,13 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
         timer.scheduleAtFixedRate(task, 0, 10000);
     }
 
-    public void receiveMessage(SingleChatMessage singleChatMessage) {
-        view.addMessage(singleChatMessage);
+    public void receiveMessage(SingleChatMessage s) {
+        view.addMessage(s);
+
+        if(s.getType().equals("text")){
+            chatMessageService.persistentMessage(s.getReceiverID(),s.getSenderID(),s.getReceiverID(),(String)s.getContent());
+        }
+
     }
 
     public void setLoginStatus(String loginStatus) {
@@ -93,4 +101,7 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
     }
 
 
+    public void moveToBottom(){
+        view.moveToBottom();
+    }
 }

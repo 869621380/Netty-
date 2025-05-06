@@ -1,5 +1,6 @@
 package org.example;
 
+import ch.qos.logback.core.net.SocketConnector;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -44,6 +45,7 @@ public class Client {
                 //获取用户在线信息
                 ch.pipeline().addLast(new LoginStatusResponseHandler());
                 ch.pipeline().addLast(new SingleChatRequestHandler());
+                ch.pipeline().addLast(new ExceptionHandler());
             }
         });
 

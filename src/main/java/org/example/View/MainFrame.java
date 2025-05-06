@@ -15,16 +15,17 @@ import java.util.Map;
 
 public class MainFrame extends JFrame {
 
-    private ChatWindow currentChatWindow = null;
+
     private ChatListController chatListController;
-    private Map<Integer,ChatWindow> chatWindowMap;
+
     private Map<Integer,ChatWindowMessageController>chatWindowMessageControllerMap;
     //是否联网
     @Getter
     boolean isCtx;
-    private ChatWindow currentWindow;
+
     public MainFrame(Integer userId) {
         setTitle("Main Frame");
+
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -32,6 +33,7 @@ public class MainFrame extends JFrame {
                 super.windowClosing(e);
             }
         });
+
         setSize(925,650);
         setLayout(null);
         setVisible(true);
@@ -41,32 +43,34 @@ public class MainFrame extends JFrame {
         chatListPanel.setVisible(true);
         chatListPanel.setBounds(50,-5,240,650);
         add(chatListPanel);
+
         new Thread(()-> {
             try {
                 chatListController.getLatch().await();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+
             Map<Integer,ChatWindow>chatWindowMap=chatListPanel.getChatWindowMap();
             chatWindowMessageControllerMap=chatListPanel.getChatWindowMessageControllerMap();
+
             MessageCache.setChatWindowMessageControllerMap(chatWindowMessageControllerMap);
             MessageCache.setChatListController(chatListController);
+
+
+
             for(Map.Entry<Integer,ChatWindow> entry:chatWindowMap.entrySet()){
                 entry.getValue().setBounds(300, 0, 610, 613);
                 add(entry.getValue());
             }
+
             revalidate();
             repaint();
+
+            chatListController.sendInitMessage(userId);
         }).start();
 
 
-    }
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                new MainFrame(1);
-            }
-        });
     }
 
     public void addCtx(ChannelHandlerContext ctx){
@@ -89,5 +93,7 @@ public class MainFrame extends JFrame {
             entry.getValue().setCtx(null);
         }
     }
+
+
 }
 

@@ -1,5 +1,6 @@
 package org.example.View;
 
+import io.netty.channel.ChannelHandlerContext;
 import lombok.Getter;
 import lombok.Setter;
 import org.example.Controller.ChatWindowMessageController;
@@ -24,17 +25,16 @@ import java.util.*;
 import java.util.List;
 
 
-
 public class ChatListPanel extends JPanel {
     private static final Logger log = LoggerFactory.getLogger(ChatListPanel.class);
     //用户id
     Integer userId;
     //聊天列表
-    private  JList<ChatItem> list;
+    private JList<ChatItem> list;
     //关联列表
     private DefaultListModel<ChatItem> listModel;
     @Getter
-    private Map<Integer,ChatWindow> chatWindowMap;
+    private Map<Object, ChatWindow> chatWindowMap;
     @Getter
     @Setter
     List<ChatWindow> chatWindowList;
@@ -49,7 +49,7 @@ public class ChatListPanel extends JPanel {
 
     ChatWindow currentChatWindow;
     @Getter
-    Map<Integer,ChatWindowMessageController>chatWindowMessageControllerMap;
+    Map<Object, ChatWindowMessageController> chatWindowMessageControllerMap;
     //    ChatWindowMessageController chatWindowMessageController;
     // 图片缓存
     private static final Map<String, Image> imageCache = new HashMap<>();
@@ -74,9 +74,9 @@ public class ChatListPanel extends JPanel {
 
     }
 
-    public void addChatItem(List<ChatItem>chatItems){
-        if (chatItems!=null){
-            for(ChatItem chatItem:chatItems){
+    public void addChatItem(List<ChatItem> chatItems) {
+        if (chatItems != null) {
+            for (ChatItem chatItem : chatItems) {
                 listModel.addElement(chatItem);
             }
         }
@@ -118,11 +118,17 @@ public class ChatListPanel extends JPanel {
                 if (index >= 0) {
                     listModel.getElementAt(index).setUnreadCount(0); //点击时将未读消息数设为0
                     //      ChatItem item = list.getModel().getElementAt(index);
-                    ChatWindow chatWindow = chatWindowMap.get(list.getModel().getElementAt(index).getReceiverId());
-                    if(currentChatWindow==null){
+                    ChatWindow chatWindow = chatWindowMap.get(0);
+                    //在mapper中，单聊键为id，群聊键为name
+                    if (list.getModel().getElementAt(index).getReceiverType() == 0) {
+                        chatWindow = chatWindowMap.get(list.getModel().getElementAt(index).getReceiverId());
+                    } else {
+                        chatWindow=chatWindowMap.get(list.getModel().getElementAt(index).getReceiverName());
+                    }
+                    if (currentChatWindow == null) {
                         currentChatWindow = chatWindow;
                         currentChatWindow.setVisible(true);
-                    }else if(currentChatWindow!=chatWindow){
+                    } else if (currentChatWindow != chatWindow) {
                         currentChatWindow.setVisible(false);
                         currentChatWindow = chatWindow;
                         currentChatWindow.setVisible(true);
@@ -144,7 +150,7 @@ public class ChatListPanel extends JPanel {
     //设定chatlistListener监听器，调用setInitData，传入用户id
     public void setChatListener(ChatListListener listener) {
         this.listener = listener;
-        if(listener != null) {
+        if (listener != null) {
             listener.setInitData(userId);
         }
     }
@@ -154,17 +160,16 @@ public class ChatListPanel extends JPanel {
         this.createGroupListener = listener;
     }
 
-    public void updateItem(Integer receiverId,String content) {
-        for(int i=0; i<listModel.size(); i++){
+    public void updateItem(Integer receiverId, String content) {
+        for (int i = 0; i < listModel.size(); i++) {
             ChatItem chatItem = listModel.get(i);
-            if(chatItem.getReceiverId().equals(receiverId)){
+            if (chatItem.getReceiverId().equals(receiverId)) {
                 chatItem.setPreview(content);
                 chatItem.setPreviewTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
                 break;
             }
         }
     }
-
 
 
     static class ChatItemRenderer extends JPanel implements ListCellRenderer<ChatItem> {
@@ -217,7 +222,7 @@ public class ChatListPanel extends JPanel {
 
             titleLabel.setText(item.getReceiverName());
             try {
-                if(item.getPreviewTime()!=null) {
+                if (item.getPreviewTime() != null) {
                     Date itemDate = new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(String.valueOf(item.getPreviewTime()));
                     Calendar itemCalendar = Calendar.getInstance();
                     itemCalendar.setTime(itemDate);
@@ -233,8 +238,7 @@ public class ChatListPanel extends JPanel {
                     } else {
                         timeLabel.setText(new SimpleDateFormat("yyyy-MM").format(itemDate));
                     }
-                }
-                else timeLabel.setText("");
+                } else timeLabel.setText("");
 
             } catch (ParseException e) {
                 timeLabel.setText(String.valueOf(item.getPreviewTime()));
@@ -245,7 +249,7 @@ public class ChatListPanel extends JPanel {
                     item.getPreview());
 
             //加载头像
-            if (item.getAvatarPath()!= null) {
+            if (item.getAvatarPath() != null) {
                 Image image = imageCache.get(item.getAvatarPath());
                 if (image == null) {
                     try {
@@ -253,7 +257,7 @@ public class ChatListPanel extends JPanel {
                         image = original.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
                         imageCache.put(item.getAvatarPath(), image);
                     } catch (IOException e) {
-                        image=imageCache.get(Constants.DEFAULT_AVATAR);
+                        image = imageCache.get(Constants.DEFAULT_AVATAR);
                     }
                 }
                 iconLabel.setIcon(new ImageIcon(image));
@@ -277,7 +281,7 @@ public class ChatListPanel extends JPanel {
             setBackground(isSelected ?
                     new Color(219, 219, 219) :
                     list.getBackground());
-            LocalDateTime time2=LocalDateTime.now();
+            LocalDateTime time2 = LocalDateTime.now();
 
             return this;
         }
@@ -309,22 +313,31 @@ public class ChatListPanel extends JPanel {
         void setInitData(Integer userId);
 
     }
+
     // 添加群聊创建监听器接口
     public interface CreateGroupListener {
         void onCreateGroupRequested(Integer userId);
     }
 
-    public void addChatWindow(List<ChatItem>chatItems) {
+    //增加群聊Window创建途径
+    public void addChatWindow(List<ChatItem> chatItems) {
 
-        for(ChatItem chatItem:chatItems){
-            ChatWindow chatWindow=new ChatWindow(userId,chatItem.getReceiverId());
-            chatWindowMap.put(chatItem.getReceiverId(),chatWindow);
-            //  chatWindowMessageController.setView(chatWindow);
-            ChatWindowMessageController chatWindowMessageController=new ChatWindowMessageController(chatWindow);
-            chatWindowMessageControllerMap.put(chatItem.getReceiverId(),chatWindowMessageController);
-            chatWindow.setVisible(false);
+        for (ChatItem chatItem : chatItems) {
+            ChatWindow chatWindow = new ChatWindow(userId, chatItem.getReceiverId(),chatItem.getReceiverName());
+            if (chatItem.getReceiverId() != -1) {  //单聊
+                chatWindowMap.put(chatItem.getReceiverId(), chatWindow);
+                //  chatWindowMessageController.setView(chatWindow);
+                ChatWindowMessageController chatWindowMessageController = new ChatWindowMessageController(chatWindow);
+                chatWindowMessageControllerMap.put(chatItem.getReceiverId(), chatWindowMessageController);
+                chatWindow.setVisible(false);
+            } else {  //群聊
+                chatWindowMap.put(chatItem.getReceiverName(), chatWindow);
+                ChatWindowMessageController chatWindowMessageController = new ChatWindowMessageController(chatWindow);
+                chatWindowMessageControllerMap.put(chatItem.getReceiverName(), chatWindowMessageController);
+                chatWindow.setVisible(false);
+            }
         }
-        // chatWindowMessageController.setView(null);
+
     }
 
 }

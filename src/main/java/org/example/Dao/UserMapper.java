@@ -46,4 +46,10 @@ public interface UserMapper extends BaseMapper<user> {
             @Result(property = "id",column = "UserID")
     })
     List<UserInfo> getUserInfoByIds(@Param("senderId") Integer senderId, @Param("receiverId") Integer receiverId);
+
+
+
+    @Select("SELECT username FROM user WHERE UserID = #{senderID}")
+
+    String getNameById(Integer senderID);
 }

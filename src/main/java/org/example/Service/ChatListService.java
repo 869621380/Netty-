@@ -20,35 +20,26 @@ public class ChatListService {
     private final FriendshipsMapper friendshipsMapper;
 
     private final UserMapper userMapper;
-
+    private final Group_membersMapper group_membersMapper;
     public ChatListService() {
         this.friendshipsMapper = MyBatisUtil.friendshipsMapper;
         this.userMapper = MyBatisUtil.userMapper;
+        this.group_membersMapper=MyBatisUtil.group_membersMapper;
     }
 
     public List<ChatItem> getChatItems(Integer userId) {
         //return chatListMapper.getChatItems(userId);
         //获取当前用户所有好友ID
         List<Integer> friendsID=friendshipsMapper.selectFriendIdsByUserId1(userId);
-        if (!friendsID.isEmpty()){
+        List<ChatItem> groupsItem=group_membersMapper.selectGroupNameByUserId(userId);
+        if (!friendsID.isEmpty() ){
             List<ChatItem> friendsItem = userMapper.selectChatItemsByIds(friendsID);
+            friendsItem.addAll(groupsItem);
             return friendsItem;
         }
         return null;
     }
 
 
-    public ChatItem createGroup(Integer creatorId, String groupName, List<Integer> memberIds) {
-        // 实现创建群聊的逻辑
-        // 返回新创建的群聊项
-        ChatItem group = new ChatItem();
-        group.setReceiverId(-1); // 假设这是群ID
-        group.setReceiverName(groupName);
-        group.setPreview("[新群聊]");
-        group.setPreviewTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        group.setUnreadCount(0);
-        group.setAvatarPath("img.png"); // 需要定义这个常量
 
-        return group;
-    }
 }

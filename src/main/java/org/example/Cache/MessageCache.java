@@ -14,7 +14,7 @@ import java.util.Map;
 public class MessageCache {
     private static final Map<Integer, Message> messageCache = new HashMap<>();
     @Setter
-    private static Map<Integer,ChatWindowMessageController>chatWindowMessageControllerMap;
+    private static Map<Object,ChatWindowMessageController>chatWindowMessageControllerMap;
     @Setter
     @Getter
     private static ChatListController chatListController;
@@ -27,7 +27,7 @@ public class MessageCache {
         messageCache.remove(id);
     }
 
-    public static Map<Integer, ChatWindowMessageController>GetChatWindowMessageControllerMap(){
+    public static Map<Object, ChatWindowMessageController>GetChatWindowMessageControllerMap(){
         return chatWindowMessageControllerMap;
     }
 

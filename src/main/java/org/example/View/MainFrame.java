@@ -12,13 +12,14 @@ import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Map;
+import java.util.Objects;
 
 public class MainFrame extends JFrame {
 
     private ChatWindow currentChatWindow = null;
     private ChatListController chatListController;
     private Map<Integer,ChatWindow> chatWindowMap;
-    private Map<Integer,ChatWindowMessageController>chatWindowMessageControllerMap;
+    private Map<Object,ChatWindowMessageController>chatWindowMessageControllerMap;
     //是否联网
     @Getter
     boolean isCtx;
@@ -47,11 +48,11 @@ public class MainFrame extends JFrame {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            Map<Integer,ChatWindow>chatWindowMap=chatListPanel.getChatWindowMap();
+            Map<Object,ChatWindow>chatWindowMap=chatListPanel.getChatWindowMap();
             chatWindowMessageControllerMap=chatListPanel.getChatWindowMessageControllerMap();
             MessageCache.setChatWindowMessageControllerMap(chatWindowMessageControllerMap);
             MessageCache.setChatListController(chatListController);
-            for(Map.Entry<Integer,ChatWindow> entry:chatWindowMap.entrySet()){
+            for(Map.Entry<Object,ChatWindow> entry:chatWindowMap.entrySet()){
                 entry.getValue().setBounds(300, 0, 610, 613);
                 add(entry.getValue());
             }
@@ -75,7 +76,7 @@ public class MainFrame extends JFrame {
         ThreadPoolManager.getDBExecutorService().execute(() -> {
             try {
                 chatListController.getLatch().await();
-                for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
+                for(Map.Entry<Object,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
                     entry.getValue().setCtx(ctx);
                 }
             }catch(InterruptedException e){}
@@ -85,7 +86,7 @@ public class MainFrame extends JFrame {
     public void removeCtx(){
         isCtx=false;
         chatListController.setCtx(null);
-        for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
+        for(Map.Entry<Object,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
             entry.getValue().setCtx(null);
         }
     }

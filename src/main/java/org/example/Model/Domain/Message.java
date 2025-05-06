@@ -1,15 +1,27 @@
 package org.example.Model.Domain;
 
+import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-
+@Data
 public class Message {
     //发送状态
     @Getter
     protected String sendStatus;
+    @Setter
+    public Integer senderID;
+    @Setter
+    public String senderName=""; //单聊默认为空不显示
+    @Setter
+    public String type;
+    @Setter
+    public Object content;
+    @Setter
+    public String sendTime;
     public static final String SENDING="发送中";
     public static final String SENT="已发送";
     public static final String FAILED="发送失败";
@@ -35,4 +47,5 @@ public class Message {
             }
         }
     }
+
 }

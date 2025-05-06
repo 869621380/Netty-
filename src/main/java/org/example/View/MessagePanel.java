@@ -1,5 +1,6 @@
 package org.example.View;
 
+import org.example.Model.Domain.Message;
 import org.example.Model.Domain.SingleChatMessage;
 import org.example.Util.Constants;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class MessagePanel extends JPanel implements ActionListener {
     private JLabel statusLabel;
     //头像
     private JLabel avatarLabel;
-    private SingleChatMessage content;
+    private Message content;
 
     /**
      *
@@ -36,7 +37,7 @@ public class MessagePanel extends JPanel implements ActionListener {
      * @param content 内容
      * @param userId 当前登录账号的ID
      */
-    public MessagePanel(BufferedImage avatarImage, SingleChatMessage content, int userId) {
+    public MessagePanel(BufferedImage avatarImage, Message content, int userId) {
 
         this.isSelf = content.getSenderID() == userId;
         this.content = content;
@@ -45,7 +46,7 @@ public class MessagePanel extends JPanel implements ActionListener {
 
     }
 
-    void setLayout(BufferedImage avatarImage, SingleChatMessage content, int userId) {
+    void setLayout(BufferedImage avatarImage, Message content, int userId) {
         setLayout(null);
         setOpaque(false);
         // 头像标签
@@ -61,15 +62,28 @@ public class MessagePanel extends JPanel implements ActionListener {
         statusLabel = new JLabel();
         statusLabel.setFont(new Font("Microsoft YaHei", Font.PLAIN, 10)); // Windows
         if (isSelf) {
-            System.out.println("status:::"+content.getSendStatus());
+            //System.out.println("status:::"+content.getSendStatus());
             setStatus(content.getSendStatus()); // 默认状态
             add(statusLabel);
         }
         // 消息气泡
         JPanel bubblePanel = getContentPanel(content, isSelf);
         add(bubblePanel);
-
+        //发送人名称  隐含限制，单聊的content.getSenderName()为默认空字符串，不会显示。而群聊必须为content的senderName赋值
+        if(!isSelf) {
+            JLabel nameLabel = createNameLabel(content.getSenderName());
+            add(nameLabel);
+        }
         layoutComponents(avatarLabel, timeLabel, bubblePanel, Constants.MESSAGE_PANEL_WIDTH);
+    }
+
+    private JLabel createNameLabel(String senderName) {
+        //System.out.println("senderName:"+senderName);
+        JLabel label = new JLabel(senderName, SwingConstants.LEFT);
+        label.setForeground(Color.black);
+        label.setFont(new Font("宋体", Font.PLAIN, 15));
+        label.setSize(80, 15);
+        return label;
     }
 
 
@@ -142,7 +156,7 @@ public class MessagePanel extends JPanel implements ActionListener {
         layoutComponents();
     }
 
-    public JPanel getContentPanel(SingleChatMessage content, boolean isSelf) {
+    public JPanel getContentPanel(Message content, boolean isSelf) {
 
         if (content.getType().equals("text")) {
             return getTextContentPanel(content, isSelf);
@@ -153,7 +167,7 @@ public class MessagePanel extends JPanel implements ActionListener {
         return null;
     }
 
-    private JPanel getTextContentPanel(SingleChatMessage content, boolean isSelf) {
+    private JPanel getTextContentPanel(Message content, boolean isSelf) {
         JTextArea messageTextArea = new JTextArea(String.valueOf(content.getContent()));
         messageTextArea.setEditable(false);
         messageTextArea.setLineWrap(true);
@@ -223,7 +237,7 @@ public class MessagePanel extends JPanel implements ActionListener {
      * 图片消息
      */
 
-    public JPanel getImageContentPanel(SingleChatMessage singleChatMessage,boolean isSelf)  {
+    public JPanel getImageContentPanel(Message singleChatMessage,boolean isSelf)  {
         JPanel messageBubblePanel = new JPanel(new BorderLayout());
         messageBubblePanel.setOpaque(true);
         if (isSelf) {

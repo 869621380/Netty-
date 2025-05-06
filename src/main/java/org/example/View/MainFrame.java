@@ -26,6 +26,7 @@ public class MainFrame extends JFrame {
     private ChatWindow currentWindow;
     public MainFrame(Integer userId) {
         setTitle("Main Frame");
+
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -33,6 +34,7 @@ public class MainFrame extends JFrame {
                 super.windowClosing(e);
             }
         });
+
         setSize(925,650);
         setLayout(null);
         setVisible(true);
@@ -42,6 +44,7 @@ public class MainFrame extends JFrame {
         chatListPanel.setVisible(true);
         chatListPanel.setBounds(50,-5,240,650);
         add(chatListPanel);
+
         new Thread(()-> {
             try {
                 chatListController.getLatch().await();
@@ -58,6 +61,8 @@ public class MainFrame extends JFrame {
             }
             revalidate();
             repaint();
+
+            chatListController.sendInitMessage(userId);
         }).start();
 
 
@@ -90,5 +95,7 @@ public class MainFrame extends JFrame {
             entry.getValue().setCtx(null);
         }
     }
+
+
 }
 

@@ -6,8 +6,10 @@ import org.example.Model.Domain.GroupChatMessage;
 import org.example.Model.Domain.Message;
 import org.example.Model.Domain.SingleChatMessage;
 import org.example.Model.Domain.UserInfo;
+import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
 import org.example.Service.ChatMessageService;
 import org.example.Service.UserInfoService;
+import org.example.Util.ThreadPoolManager;
 import org.example.View.ChatWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +45,9 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
 
     @Override
     public void setInitData(Integer senderId, Integer receiverId) {
-        System.out.println("发送人和接收人ID："+senderId+"  "+receiverId);
+
         List<UserInfo>userInfos= userInfoService.getUserAvatar(senderId, receiverId);
-        System.out.println(userInfos);
+
         view.setReceiverNameLabel(userInfos.get(1).getNickname());
         view.setStatusLabel("未知");
         //加载头像
@@ -127,4 +129,7 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
     }
 
 
+    public void moveToBottom(){
+        view.moveToBottom();
+    }
 }

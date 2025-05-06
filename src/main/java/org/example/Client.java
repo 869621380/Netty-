@@ -40,6 +40,7 @@ public class Client {
                 ch.pipeline().addLast(new MessageCodec());
                 ch.pipeline().addLast(new HeartbeatAndPongHandler());
                 ch.pipeline().addLast(new NettyClientLoginRegisterHandler(loginController));
+                ch.pipeline().addLast(new RegisterResponseHandler(loginController));
                 //获取用户在线信息
                 ch.pipeline().addLast(new LoginStatusResponseHandler());
                 ch.pipeline().addLast(new SingleChatRequestHandler());

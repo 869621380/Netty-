@@ -21,16 +21,21 @@ public class SingleChatRequestHandler extends SimpleChannelInboundHandler<Single
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, SingleChatRequestMessage singleChatRequestMessage) throws Exception {
+        log.debug("收到一条消息，senderID={}",singleChatRequestMessage.getSenderID());
         ChatWindowMessageController chatWindowMessageController
                 =MessageCache.GetChatWindowMessageControllerMap().get(singleChatRequestMessage.getSenderID());
+
         if(chatWindowMessageController==null)return;
+
         SingleChatMessage singleChatMessage=
                 new SingleChatMessage(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")),
                         SingleChatMessage.SENDING, singleChatRequestMessage.getSenderID(),
                         singleChatRequestMessage.getReceiverID(),null,null);
         if(singleChatRequestMessage instanceof SingleChatTextRequestMessage){
+            log.debug("收到了一条文本消息");
             singleChatMessage.setType("text");
             singleChatMessage.setContent(((SingleChatTextRequestMessage)singleChatRequestMessage).getContent());
+
             MessageCache.getChatListController().updatePreview(singleChatMessage.getSenderID(),(String) singleChatMessage.getContent());
         }
 
@@ -40,7 +45,9 @@ public class SingleChatRequestHandler extends SimpleChannelInboundHandler<Single
             singleChatMessage.setContent(((SingleChatImageRequestMessage)singleChatRequestMessage).getContent());
             MessageCache.getChatListController().updatePreview(singleChatMessage.getSenderID(),"[图片]");
         }
+
         chatWindowMessageController.receiveMessage(singleChatMessage);
+
     }
 
     @Override

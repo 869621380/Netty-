@@ -335,6 +335,13 @@ public class ChatWindow extends JLabel {
     }
 
 
+    public void moveToBottom() {
+        SwingUtilities.invokeLater(() -> {
+            JScrollBar vertical = scrollPane.getVerticalScrollBar();
+            vertical.setValue(vertical.getMaximum());
+        });
+    }
+
     public interface ChatMessageListener {
         void setInitData(Integer senderId, Integer receiverId);
 

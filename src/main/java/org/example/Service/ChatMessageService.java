@@ -10,6 +10,7 @@ import org.example.Model.Domain.Message;
 import org.example.Model.Domain.SingleChatMessage;
 import org.example.Model.message.requestMessage.*;
 import org.example.Util.MyBatisUtil;
+import org.example.Util.ThreadPoolManager;
 import org.example.entity.private_chat_records;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class ChatMessageService {
         if(content.getType().equals("text")){
             singleChatRequestMessage=new SingleChatTextRequestMessage(content.getSendTime(),content.getSenderID(),content.getReceiverID(),(String) content.getContent());
             MessageCache.getChatListController().updatePreview(content.getReceiverID(), (String) content.getContent());
-            int result=private_chat_recordsMapper.insertSingleMessage(content.getSenderID(),content.getReceiverID(),content.getContent());
+            int result=private_chat_recordsMapper.insertSingleMessage(content.getSenderID(),content.getSenderID(),content.getReceiverID(),content.getContent());
             System.out.println("success:"+result);
         }
         else if(content.getType().equals("image")){
@@ -160,6 +161,17 @@ public class ChatMessageService {
         }
     }
 
+    /**
+     * 将用户接收到的信息写入数据库
+     * @param masterId
+     * @param senderId
+     * @param receiverId
+     * @param content
+     */
+    public void persistentMessage(Integer masterId,Integer senderId,Integer receiverId,String content){
 
-
+        ThreadPoolManager.getDBExecutorService().execute(
+                ()->private_chat_recordsMapper.insertSingleMessage(masterId,senderId,receiverId,content)
+        );
+    }
 }

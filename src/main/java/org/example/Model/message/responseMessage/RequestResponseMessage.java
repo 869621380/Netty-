@@ -10,6 +10,6 @@ import org.example.Model.message.Message;
 @NoArgsConstructor
 @AllArgsConstructor
 public abstract class RequestResponseMessage extends Message {
-    private boolean success;
-    private String reason;
+    protected boolean success;
+    protected String reason;
 }

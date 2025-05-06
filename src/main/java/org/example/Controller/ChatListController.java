@@ -132,5 +132,14 @@ public class ChatListController implements ChatListPanel.ChatListListener,
         }
         view.setCurrentChatWindow(groupWindow);
         groupWindow.setVisible(true);
+
+    }
+
+    public void sendInitMessage(Integer userId) {
+        if(ctx!=null) {
+            chatListService.sendInitMessage(userId, ctx);
+        }else{
+            System.out.println("ctx为空");
+        }
     }
 }

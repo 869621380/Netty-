@@ -99,7 +99,7 @@ public class LoginView extends JFrame {
                         addComponents();
                         repaint();
                     }
-                    else listener.onRegisterRequest(usernameField.getText(), new String(passwordField.getPassword()),emailField.getText(),codeField.getText());
+                    else listener.onRegisterRequest(emailField.getText(),codeField.getText(),new String(passwordField.getPassword()));
                 }
             }
         });
@@ -251,10 +251,23 @@ public class LoginView extends JFrame {
         }
     }
 
+    public void disableGetCodeButtonFor30Seconds() {
+        getCodeButton.setEnabled(false);
+        Timer timer = new Timer(30000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                getCodeButton.setEnabled(true);
+                ((Timer) e.getSource()).stop();
+            }
+        });
+        timer.start();
+    }
+
+
     // 事件监听器接口
     public interface LoginMessageListener {
         void onLoginRequest(String username, String password);
-        void onRegisterRequest(String username, String password, String email, String code);
+        void onRegisterRequest(String email, String code,String password);
         void onGetCodeRequest(String email);
     }
 }    

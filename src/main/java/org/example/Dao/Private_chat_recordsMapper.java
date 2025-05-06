@@ -22,8 +22,8 @@ public interface Private_chat_recordsMapper extends BaseMapper<private_chat_reco
             "'text' AS type,"+
             "DATE_FORMAT(send_time, '%Y-%m-%d %H:%i:%s') AS send_time " +
             "FROM private_chat_records " +
-            "WHERE ((sender_id = #{senderID} AND receiver_id = #{receiverID}) "+
-            "OR (sender_id=#{receiverID} AND receiver_id=#{senderID}))" +
+            "WHERE (((sender_id = #{senderID} AND receiver_id = #{receiverID}) "+
+            "OR (sender_id=#{receiverID} AND receiver_id=#{senderID})) AND master_id=#{senderID})" +
             "ORDER BY send_time ASC")
     @Results({
             @Result(property = "sendTime", column = "send_time"),
@@ -37,7 +37,7 @@ public interface Private_chat_recordsMapper extends BaseMapper<private_chat_reco
 
 
 
-    @Insert("INSERT INTO private_chat_records (sender_id, receiver_id, message) " +
-            "VALUES (#{sender_id}, #{receiver_id},#{message} ); ")
-    int insertSingleMessage(@Param("sender_id")int sender_id, @Param("receiver_id") int receiver_id, @Param("message") Object message);
+    @Insert("INSERT INTO private_chat_records (master_id,sender_id, receiver_id, message) " +
+            "VALUES (#{master_id},#{sender_id}, #{receiver_id},#{message} ); ")
+    int insertSingleMessage(@Param("master_id")int master_id,@Param("sender_id")int sender_id, @Param("receiver_id") int receiver_id, @Param("message") Object message);
 }

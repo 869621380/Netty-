@@ -103,6 +103,7 @@ public class ChatMessageService {
     public void sendGroupMessage(GroupChatMessage content, ChannelHandlerContext ctx) {
         System.out.println("消息类型："+content.getType());
         GroupChatRequestMessage groupChatRequestMessage = null;
+        //System.out.println("groupName:"+content.getGroupName());
         if(content.getType().equals("text")){
             groupChatRequestMessage=new GroupChatTextRequestMessage(content.getSendTime(),content.getSenderID(),content.getGroupName(),(String) content.getContent());
             //补全preview
@@ -116,7 +117,7 @@ public class ChatMessageService {
             //补全preview
             //MessageCache.getChatListController().updatePreview(content.getReceiverID(),"[图片]");
         }
-
+        System.out.println("ctx=="+ctx);
         if(ctx!=null&&groupChatRequestMessage!=null){
             //      MessageCache.addMessageCache(singleChatRequestMessage.getSequenceId(),content);
             //这里应该响应后再SENT

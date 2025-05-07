@@ -68,7 +68,6 @@ public abstract class Message implements Serializable {
     public static final int GroupJoinResponseMessage = 53;
     public static final int GroupQuitResponseMessage = 54;
     public static final int GroupMembersResponseMessage = 55;
-    public static final int RegisterCodeRequestMessage=56;
     public static final int IdentityVerifyMessage=110;
     //   public static final int IdentityVerifyResponseMessage=111;
 

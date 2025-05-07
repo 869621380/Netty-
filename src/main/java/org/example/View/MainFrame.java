@@ -63,6 +63,19 @@ public class MainFrame extends JFrame {
             repaint();
 
             chatListController.sendInitMessage(userId);
+
+            while(true){
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                if(chatListPanel.flag){
+                    System.out.println("建哥秘卤");
+                    add(chatListPanel.tempWindow);
+                    chatListPanel.flag=false;
+                }
+            }
         }).start();
 
 

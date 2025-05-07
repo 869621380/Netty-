@@ -12,8 +12,8 @@ public class GroupCreateResponseHandler extends SimpleChannelInboundHandler<Grou
     protected void channelRead0(ChannelHandlerContext ctx, GroupCreateResponseMessage groupCreateResponseMessage) throws Exception {
         if (groupCreateResponseMessage.isSuccess()) {
             //更新聊天列表
-            MessageCache.getChatListController().addGroupItem(groupCreateResponseMessage);
-            //在群聊中显示拉群消息
+            MessageCache.getChatListController().addGroupItem(groupCreateResponseMessage,ctx);
+            //在群聊
 
         } else {
             System.out.println("建群失败");

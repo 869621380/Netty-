@@ -43,7 +43,6 @@ public class ChatListController implements ChatListPanel.ChatListListener,
     @Override
     public void setInitData(Integer userId) {
         //单聊+群聊列表
-        System.out.println("view:"+view);
         List<ChatItem>chatItems=chatListService.getChatItems(userId);
         view.addChatItem(chatItems);
         view.revalidate();
@@ -56,7 +55,10 @@ public class ChatListController implements ChatListPanel.ChatListListener,
         });
 
     }
-
+//    public void updateChatWindow(String groupName){
+//        System.out.println(view.getChatWindowMap().get(groupName));
+//        view.getChatWindowMap().get(groupName).setVisible(true);
+//    }
     public void updatePreview(Integer receiverId,String content) {
         view.updateItem(receiverId,content);
 
@@ -116,6 +118,7 @@ public class ChatListController implements ChatListPanel.ChatListListener,
 
         return;
     }
+
     public void addGroupItem(GroupCreateResponseMessage groupCreateResponseMessage){
 
         ChatItem newGroup=new ChatItem(1,-1,groupCreateResponseMessage.getReason().split(":")[1],"img.png",1,groupCreateResponseMessage.getReason(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
@@ -125,8 +128,26 @@ public class ChatListController implements ChatListPanel.ChatListListener,
 
         // 4. 打开新群聊窗口
         ChatWindow groupWindow = view.getChatWindowMap().get(newGroup.getReceiverName());
-        System.out.println("新窗口："+groupWindow);
-        System.out.println("view:"+view);
+        //System.out.println("新窗口："+newGroup.getReceiverName());
+        //System.out.println("view:"+view);
+        if (view.getCurrentChatWindow() != null) {
+            view.getCurrentChatWindow().setVisible(false);
+        }
+        view.setCurrentChatWindow(groupWindow);
+        groupWindow.setVisible(true);
+
+    }
+    public void addGroupItem(GroupCreateResponseMessage groupCreateResponseMessage,ChannelHandlerContext ctx){
+
+        ChatItem newGroup=new ChatItem(1,-1,groupCreateResponseMessage.getReason().split(":")[1],"img.png",1,groupCreateResponseMessage.getReason(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        // 3. 更新UI
+        view.addChatItem(Collections.singletonList(newGroup));
+        view.addChatWindow(Collections.singletonList(newGroup),ctx);
+
+        // 4. 打开新群聊窗口
+        ChatWindow groupWindow = view.getChatWindowMap().get(newGroup.getReceiverName());
+        //System.out.println("新窗口："+newGroup.getReceiverName());
+        //System.out.println("view:"+view);
         if (view.getCurrentChatWindow() != null) {
             view.getCurrentChatWindow().setVisible(false);
         }

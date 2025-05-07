@@ -39,6 +39,9 @@ public class ChatListPanel extends JPanel {
     @Setter
     List<ChatWindow> chatWindowList;
 
+    public boolean flag;
+    public ChatWindow tempWindow;
+
     public void setCurrentChatWindow(ChatWindow currentChatWindow) {
         this.currentChatWindow = currentChatWindow;
     }
@@ -61,6 +64,7 @@ public class ChatListPanel extends JPanel {
 
     public ChatListPanel(Integer userId) {
         this.userId = userId;
+        flag = false;
         //  chatWindowMessageController=new ChatWindowMessageController(null);
         chatWindowMessageControllerMap = new HashMap<>();
         try {
@@ -115,6 +119,7 @@ public class ChatListPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int index = list.locationToIndex(e.getPoint());
+                log.info("you clicked the index :{}", index);
                 if (index >= 0) {
                     listModel.getElementAt(index).setUnreadCount(0); //点击时将未读消息数设为0
                     //      ChatItem item = list.getModel().getElementAt(index);
@@ -124,17 +129,27 @@ public class ChatListPanel extends JPanel {
                         chatWindow = chatWindowMap.get(list.getModel().getElementAt(index).getReceiverId());
                     } else {
                         chatWindow=chatWindowMap.get(list.getModel().getElementAt(index).getReceiverName());
-                    }
-                    if (currentChatWindow == null) {
-                        currentChatWindow = chatWindow;
-                        currentChatWindow.setVisible(true);
+                        log.info(chatWindow.toString());
                     }
 
-                    }else if(currentChatWindow!=chatWindow){
+                    if (currentChatWindow == null) {
+                        currentChatWindow = chatWindow;
                         currentChatWindow.moveToBottom();
+                        currentChatWindow.setVisible(true);
+                        log.info("当前聊天窗口：{f}");
+                    }
+                    else if(currentChatWindow!=chatWindow){
+
                         currentChatWindow.setVisible(false);
                         currentChatWindow = chatWindow;
+                        currentChatWindow.moveToBottom();
+                        log.info("当前聊天窗口：{d}" );
                         currentChatWindow.setVisible(true);
+                    }else {
+                        log.info(currentChatWindow == chatWindow ? "当前聊天窗口相同" : "当前聊天窗口不同");
+                        currentChatWindow.setVisible(false);
+                        chatWindow.setVisible(true);
+                        log.info("当前聊天窗口：{e}" );
                     }
                     revalidate();
                     repaint();
@@ -326,21 +341,52 @@ public class ChatListPanel extends JPanel {
     public void addChatWindow(List<ChatItem> chatItems) {
 
         for (ChatItem chatItem : chatItems) {
+            log.info("添加聊天窗口：{}", chatItem.getReceiverName());
             ChatWindow chatWindow = new ChatWindow(userId, chatItem.getReceiverId(),chatItem.getReceiverName());
+            chatWindow.setBounds(300, 0, 610, 613);
             if (chatItem.getReceiverId() != -1) {  //单聊
                 chatWindowMap.put(chatItem.getReceiverId(), chatWindow);
                 //  chatWindowMessageController.setView(chatWindow);
                 ChatWindowMessageController chatWindowMessageController = new ChatWindowMessageController(chatWindow);
                 chatWindowMessageControllerMap.put(chatItem.getReceiverId(), chatWindowMessageController);
                 chatWindow.setVisible(false);
+
             } else {  //群聊
+                log.info("flag is truedddddddddddddd");
                 chatWindowMap.put(chatItem.getReceiverName(), chatWindow);
                 ChatWindowMessageController chatWindowMessageController = new ChatWindowMessageController(chatWindow);
                 chatWindowMessageControllerMap.put(chatItem.getReceiverName(), chatWindowMessageController);
                 chatWindow.setVisible(false);
+                tempWindow=chatWindow;
+                flag=true;
             }
         }
-
     }
+    public void addChatWindow(List<ChatItem> chatItems,ChannelHandlerContext ctx) {
+
+        for (ChatItem chatItem : chatItems) {
+            log.info("添加聊天窗口：{}", chatItem.getReceiverName());
+            ChatWindow chatWindow = new ChatWindow(userId, chatItem.getReceiverId(),chatItem.getReceiverName());
+            chatWindow.setBounds(300, 0, 610, 613);
+            if (chatItem.getReceiverId() != -1) {  //单聊
+                chatWindowMap.put(chatItem.getReceiverId(), chatWindow);
+                //  chatWindowMessageController.setView(chatWindow);
+                ChatWindowMessageController chatWindowMessageController = new ChatWindowMessageController(chatWindow);
+                chatWindowMessageControllerMap.put(chatItem.getReceiverId(), chatWindowMessageController);
+                chatWindow.setVisible(false);
+
+            } else {  //群聊
+                log.info("flag is truedddddddddddddd");
+                chatWindowMap.put(chatItem.getReceiverName(), chatWindow);
+                ChatWindowMessageController chatWindowMessageController = new ChatWindowMessageController(chatWindow);
+                chatWindowMessageController.setCtx(ctx);
+                chatWindowMessageControllerMap.put(chatItem.getReceiverName(), chatWindowMessageController);
+                chatWindow.setVisible(false);
+                tempWindow=chatWindow;
+                flag=true;
+            }
+        }
+    }
+
 
 }

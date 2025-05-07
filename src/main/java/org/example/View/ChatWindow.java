@@ -60,7 +60,7 @@ public class ChatWindow extends JLabel {
     }
 
     private void InitLayout() {
-        System.out.println("新群聊"+receiverName+"初始化中");
+        //System.out.println("新群聊"+receiverName+"初始化中");
         setPreferredSize(new Dimension(615, 650));
         setLayout(new BorderLayout());
 

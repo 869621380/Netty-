@@ -22,8 +22,8 @@ public interface Private_chat_recordsMapper extends BaseMapper<private_chat_reco
             "'text' AS type,"+
             "DATE_FORMAT(send_time, '%Y-%m-%d %H:%i:%s') AS send_time " +
             "FROM private_chat_records " +
-            "WHERE (((sender_id = #{senderID} AND receiver_id = #{receiverID}) "+
-            "OR (sender_id=#{receiverID} AND receiver_id=#{senderID})) AND master_id=#{senderID})" +
+            "WHERE (((sender_id = #{sender_id} AND receiver_id = #{receiver_id}) "+
+            "OR (sender_id=#{receiver_id} AND receiver_id=#{sender_id})) AND master_id=#{sender_id})" +
             "ORDER BY send_time ASC")
     @Results({
             @Result(property = "sendTime", column = "send_time"),
@@ -33,7 +33,7 @@ public interface Private_chat_recordsMapper extends BaseMapper<private_chat_reco
             @Result(property = "content",column="message"),
 
     })
-    List<SingleChatMessage> selectMessagesBySenderAndReceiver(@Param("senderID")int senderID, @Param("receiverID") int receiverID);
+    List<SingleChatMessage> selectMessagesBySenderAndReceiver(@Param("sender_id")int senderID, @Param("receiver_id") int receiverID);
 
 
 

@@ -46,6 +46,11 @@ public class Client {
                 ch.pipeline().addLast(new LoginStatusResponseHandler());
                 ch.pipeline().addLast(new SingleChatRequestHandler());
                 ch.pipeline().addLast(new ExceptionHandler());
+                
+                ch.pipeline().addLast(new SearchFriendResponseHandler());
+                ch.pipeline().addLast(new AddFriendResponseHandler());
+                
+                ch.pipeline().addLast(new UserInfoResponseHandler());
             }
         });
 

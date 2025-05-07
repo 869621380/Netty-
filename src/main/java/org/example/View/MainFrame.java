@@ -68,6 +68,21 @@ public class MainFrame extends JFrame {
             repaint();
 
             chatListController.sendInitMessage(userId);
+
+            while (true){
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                if(chatListPanel.flag){
+                    add(chatListPanel.tempWindow);
+                    chatListPanel.tempWindow.setVisible(false);
+                    chatListPanel.tempWindow.setBounds(300, 0, 610, 613);
+                    chatListPanel.flag=false;
+                }
+            }
         }).start();
 
 
@@ -79,8 +94,14 @@ public class MainFrame extends JFrame {
         ThreadPoolManager.getDBExecutorService().execute(() -> {
             try {
                 chatListController.getLatch().await();
-                for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
-                    entry.getValue().setCtx(ctx);
+                // for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
+                //     entry.getValue().setCtx(ctx);
+                // }
+                // 添加空检查
+                if (chatWindowMessageControllerMap != null) {
+                    for (Map.Entry<Integer,ChatWindowMessageController> entry : chatWindowMessageControllerMap.entrySet()){
+                        entry.getValue().setCtx(ctx);
+                    }
                 }
             }catch(InterruptedException e){}
         });
@@ -89,8 +110,14 @@ public class MainFrame extends JFrame {
     public void removeCtx(){
         isCtx=false;
         chatListController.setCtx(null);
-        for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
-            entry.getValue().setCtx(null);
+        // for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
+        //     entry.getValue().setCtx(null);
+        // }
+        // 添加空检查
+        if (chatWindowMessageControllerMap != null) {
+            for (Map.Entry<Integer,ChatWindowMessageController> entry : chatWindowMessageControllerMap.entrySet()){
+                entry.getValue().setCtx(null);
+            }
         }
     }
 

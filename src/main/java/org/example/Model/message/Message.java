@@ -4,10 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import org.example.Model.message.requestMessage.*;
+import org.example.Model.message.responseMessage.AddFriendResponseMessage;
 import org.example.Model.message.responseMessage.LoginRequestResponseMessage;
 import org.example.Model.message.responseMessage.LoginStatusResponseMessage;
 import org.example.Model.message.responseMessage.RegisterRequestResponseMessage;
-
+import org.example.Model.message.responseMessage.SearchFriendResponseMessage;
+import org.example.Model.message.responseMessage.UserInfoResponseMessage;
 import org.example.Util.SequenceIdUtil;
 
 import java.io.Serializable;
@@ -50,6 +52,14 @@ public abstract class Message implements Serializable {
     public static final int SingleVideoRequestMessage = 12;
     public static final int SingleFileRequestMessage = 13;
 
+    // 添加新的消息类型常量
+    public static final int SearchFriendRequestMessage = 20;
+    public static final int SearchFriendResponseMessage = 21;
+    public static final int AddFriendRequestMessage = 22;
+    public static final int AddFriendResponseMessage = 23;
+    public static final int UserInfoRequestMessage = 24;
+    public static final int UserInfoResponseMessage = 25;
+
     public static final int GroupTextMessage = 40;
     public static final int GroupImageMessage = 41;
     public static final int GroupVideoMessage = 42;
@@ -80,6 +90,13 @@ public abstract class Message implements Serializable {
         messageClasses.put(InitOKMessage, InitOKMessage.class);
         messageClasses.put(PingMessage, PingMessage.class);
         messageClasses.put(PongMessage, PongMessage.class);
+
+        messageClasses.put(SearchFriendRequestMessage, SearchFriendRequestMessage.class);
+        messageClasses.put(SearchFriendResponseMessage, SearchFriendResponseMessage.class);
+        messageClasses.put(AddFriendRequestMessage, AddFriendRequestMessage.class);
+        messageClasses.put(AddFriendResponseMessage, AddFriendResponseMessage.class);
+        messageClasses.put(UserInfoRequestMessage, UserInfoRequestMessage.class);
+        messageClasses.put(UserInfoResponseMessage, UserInfoResponseMessage.class);
 
     }
 

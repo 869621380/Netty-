@@ -2,6 +2,7 @@ package org.example.View;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.example.Cache.MessageCache;
 import org.example.Controller.ChatWindowMessageController;
 import org.example.Model.Domain.ChatItem;
 import org.example.Util.Constants;
@@ -39,6 +40,13 @@ public class ChatListPanel extends JPanel {
     @Setter
     List<ChatWindow> chatWindowList;
 
+    boolean flag=false;
+    ChatWindow tempWindow;
+
+    public Integer getUserId() {
+        return this.userId;
+    }
+    
     public void setCurrentChatWindow(ChatWindow currentChatWindow) {
         this.currentChatWindow = currentChatWindow;
     }
@@ -58,6 +66,8 @@ public class ChatListPanel extends JPanel {
     private ChatListListener listener;
 
     private CreateGroupListener createGroupListener;
+
+    private AddFriendListener addFriendListener;
 
     public ChatListPanel(Integer userId) {
         this.userId = userId;
@@ -90,6 +100,17 @@ public class ChatListPanel extends JPanel {
         JToolBar toolBar = new JToolBar();
         toolBar.setFloatable(false);
         toolBar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        // 添加好友按钮
+        JButton addFriendBtn = new JButton("添加好友");
+        addFriendBtn.setFont(new Font("微软雅黑", Font.PLAIN, 14));
+        addFriendBtn.setFocusPainted(false);
+        addFriendBtn.addActionListener(e -> {
+            if (addFriendListener != null) {
+                addFriendListener.onAddFriendRequested(userId);
+            }
+        });
+        toolBar.add(addFriendBtn);
 
         // 创建群聊按钮
         JButton createGroupBtn = new JButton("创建群聊");
@@ -153,6 +174,10 @@ public class ChatListPanel extends JPanel {
     // 设置群聊创建监听器
     public void setCreateGroupListener(CreateGroupListener listener) {
         this.createGroupListener = listener;
+    }
+
+    public void setAddFriendListener(AddFriendListener listener) {
+        this.addFriendListener = listener;
     }
 
     public void updateItem(Integer receiverId,String content) {
@@ -315,6 +340,11 @@ public class ChatListPanel extends JPanel {
         void onCreateGroupRequested(Integer userId);
     }
 
+    public interface AddFriendListener {
+        void onAddFriendRequested(Integer userId);
+    }
+
+
     public void addChatWindow(List<ChatItem>chatItems) {
 
         for(ChatItem chatItem:chatItems){
@@ -326,6 +356,38 @@ public class ChatListPanel extends JPanel {
             chatWindow.setVisible(false);
         }
         // chatWindowMessageController.setView(null);
+    }
+
+    public void addChatWindow(ChatItem chatItem) {
+        ChatWindow chatWindow=new ChatWindow(userId,chatItem.getReceiverId());
+        chatWindowMap.put(chatItem.getReceiverId(),chatWindow);
+        //  chatWindowMessageController.setView(chatWindow);
+        ChatWindowMessageController chatWindowMessageController=new ChatWindowMessageController(chatWindow);
+        chatWindowMessageControllerMap.put(chatItem.getReceiverId(),chatWindowMessageController);
+        chatWindow.setVisible(false);
+        flag=true;
+        tempWindow=chatWindow;
+    }
+
+    public void addChatWindow(ChatItem chatItem,String receiverId) {
+        ChatWindow chatWindow=new ChatWindow(userId,chatItem.getReceiverId());
+        chatWindowMap.put(chatItem.getReceiverId(),chatWindow);
+        //  chatWindowMessageController.setView(chatWindow);
+        ChatWindowMessageController chatWindowMessageController=new ChatWindowMessageController(chatWindow);
+        chatWindowMessageControllerMap.put(chatItem.getReceiverId(),chatWindowMessageController);
+        chatWindowMessageController.setCtx(MessageCache.getChatListController().getCtx());
+        chatWindow.setVisible(false);
+        flag=true;
+        tempWindow=chatWindow;
+    }
+
+    /**
+     * 清空聊天列表
+     */
+    public void clearChatList() {
+        if (listModel != null) {
+            listModel.clear();
+        }
     }
 
 }

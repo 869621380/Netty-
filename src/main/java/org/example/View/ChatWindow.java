@@ -312,4 +312,14 @@ public class ChatWindow extends JLabel {
             listener.flushLoginStatus(receiverId);
         }
     }
+
+    // 在 ChatWindow 类中添加这些方法
+    public Integer getReceiverId() {
+        return receiverId;
+    }
+
+    public BufferedImage getSenderAvatar() {
+        return senderAvatar;
+    }
+    
 }

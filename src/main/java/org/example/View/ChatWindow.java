@@ -1,5 +1,7 @@
 package org.example.View;
 
+import org.example.Model.Domain.GroupChatMessage;
+import org.example.Model.Domain.Message;
 import org.example.Model.Domain.SingleChatMessage;
 
 import javax.imageio.ImageIO;
@@ -42,20 +44,23 @@ public class ChatWindow extends JLabel {
     private BufferedImage receiverAvatar;
     //文件
     JButton fileButton;
+    //接收人名称
+    private String receiverName;
 
     /**
-     *
-     * @param senderId 发送方ID
+     * @param senderId   发送方ID
      * @param receiverId 接收方ID
      */
-    public ChatWindow(int senderId, int receiverId) {
+    public ChatWindow(int senderId, int receiverId, String receiverName) {
         this.senderId = senderId;
         this.receiverId = receiverId;
+        this.receiverName = receiverName;
         InitLayout();
 
     }
 
     private void InitLayout() {
+        //System.out.println("新群聊"+receiverName+"初始化中");
         setPreferredSize(new Dimension(615, 650));
         setLayout(new BorderLayout());
 
@@ -108,60 +113,64 @@ public class ChatWindow extends JLabel {
         initEmojiMenu();
 
         addListener();
-
+        System.out.println("初始化完成");
     }
 
     private void initEmojiMenu() {
-            emojiMenu = new JPopupMenu();
-            JPanel emojiPanel = new JPanel(new GridLayout(0, 10));
+        emojiMenu = new JPopupMenu();
+        JPanel emojiPanel = new JPanel(new GridLayout(0, 10));
 
-            String[] emojis = {
-                    "😀", "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊",
-                    "😋", "😎", "😍", "😘", "😗", "😙", "😚", "🙂", "🤗", "🤔",
-                    "🤨", "😐", "😑", "😶", "🙄", "😏", "😣", "😥", "😮", "🤐",
-                    "😯", "😪", "😫", "😴", "😌", "😛", "😜", "😝", "🤤", "😒",
-                    "😓", "😔", "😕", "🙃", "🤑", "😲", "☹", "🙁", "😖", "😞",
-                    "😟", "😤", "😢", "😭", "😦", "😧", "😨", "😩", "🤯", "😬",
-                    "😰", "😱", "😳", "🤪", "😵", "😡", "😠", "🤬", "😷", "🤒"
-            };
+        String[] emojis = {
+                "😀", "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊",
+                "😋", "😎", "😍", "😘", "😗", "😙", "😚", "🙂", "🤗", "🤔",
+                "🤨", "😐", "😑", "😶", "🙄", "😏", "😣", "😥", "😮", "🤐",
+                "😯", "😪", "😫", "😴", "😌", "😛", "😜", "😝", "🤤", "😒",
+                "😓", "😔", "😕", "🙃", "🤑", "😲", "☹", "🙁", "😖", "😞",
+                "😟", "😤", "😢", "😭", "😦", "😧", "😨", "😩", "🤯", "😬",
+                "😰", "😱", "😳", "🤪", "😵", "😡", "😠", "🤬", "😷", "🤒"
+        };
 
-            for (String emoji : emojis) {
-                JButton emojiButton = new JButton(emoji);
-                emojiButton.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
-                emojiButton.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-                emojiButton.setContentAreaFilled(false);
-                emojiButton.addActionListener(e -> {
-                    String currentText = inputField.getText();
-                    int pos = inputField.getCaretPosition();
-                    inputField.setText(currentText.substring(0, pos) + emoji + currentText.substring(pos));
-                    inputField.setCaretPosition(pos + emoji.length());
-                });
-                emojiPanel.add(emojiButton);
+        for (String emoji : emojis) {
+            JButton emojiButton = new JButton(emoji);
+            emojiButton.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 16));
+            emojiButton.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            emojiButton.setContentAreaFilled(false);
+            emojiButton.addActionListener(e -> {
+                String currentText = inputField.getText();
+                int pos = inputField.getCaretPosition();
+                inputField.setText(currentText.substring(0, pos) + emoji + currentText.substring(pos));
+                inputField.setCaretPosition(pos + emoji.length());
+            });
+            emojiPanel.add(emojiButton);
+        }
+
+        emojiMenu.add(emojiPanel);
+
+        // 修改按钮点击事件
+        emojiButton.addActionListener(e -> {
+
+            Dimension menuSize = emojiMenu.getPreferredSize();
+            Point buttonLoc = emojiButton.getLocationOnScreen();
+            int x = 0;
+            int y = -menuSize.height;
+
+            // 如果会超出屏幕上方，改为向下弹出
+            if (buttonLoc.y - menuSize.height < 0) {
+                y = emojiButton.getHeight();
             }
 
-            emojiMenu.add(emojiPanel);
-
-            // 修改按钮点击事件
-            emojiButton.addActionListener(e -> {
-
-                Dimension menuSize = emojiMenu.getPreferredSize();
-                Point buttonLoc = emojiButton.getLocationOnScreen();
-                int x = 0;
-                int y = -menuSize.height;
-
-                // 如果会超出屏幕上方，改为向下弹出
-                if (buttonLoc.y - menuSize.height < 0) {
-                    y = emojiButton.getHeight();
-                }
-
-                emojiMenu.show(emojiButton, x, y);
-            });
-        }
+            emojiMenu.show(emojiButton, x, y);
+        });
+    }
 
     public void setChatWindowMessageListener(ChatMessageListener listener) {
         this.listener = listener;
-        if(listener != null) {
-            listener.setInitData(senderId, receiverId);
+        if (listener != null) {
+            if (this.receiverId != -1) {
+                listener.setInitData(senderId, receiverId);
+            } else {
+                listener.setGroupInitData(senderId, receiverName);
+            }
             listener.getReceiverLoginStatus(receiverId);
             SwingUtilities.invokeLater(() -> {
                 JScrollBar vertical = scrollPane.getVerticalScrollBar();
@@ -176,16 +185,16 @@ public class ChatWindow extends JLabel {
 
     public void setStatusLabel(String status) {
         statusLabel.setText(status);
-        if(status.equals("在线"))statusLabel.setForeground(Color.GREEN);
+        if (status.equals("在线")) statusLabel.setForeground(Color.GREEN);
         else statusLabel.setForeground(Color.RED);
     }
 
-    public void addMessage(SingleChatMessage content) {
-
-         MessagePanel messagePanel = new MessagePanel(
-                 Objects.equals(senderId,content.getSenderID()) ?senderAvatar:receiverAvatar,
-                 content,
-                 senderId
+    public void addMessage(Message content) {
+        //System.out.println("adding message: "+content.getContent());
+        MessagePanel messagePanel = new MessagePanel(
+                Objects.equals(senderId, content.getSenderID()) ? senderAvatar : receiverAvatar,
+                content,
+                senderId
         );
 
         chatPanel.add(messagePanel);
@@ -203,9 +212,9 @@ public class ChatWindow extends JLabel {
     }
 
 
-    public void setAvatar(BufferedImage senderAvatar,BufferedImage receiverAvatar) {
-        this.senderAvatar=senderAvatar;
-        this.receiverAvatar=receiverAvatar;
+    public void setAvatar(BufferedImage senderAvatar, BufferedImage receiverAvatar) {
+        this.senderAvatar = senderAvatar;
+        this.receiverAvatar = receiverAvatar;
     }
 
     private boolean isImage(File file) {
@@ -220,10 +229,14 @@ public class ChatWindow extends JLabel {
         return extension.equals("mp4") || extension.equals("avi") || extension.equals("mov");
     }
 
-    private void addListener(){
+    private void addListener() {
 
         //发送消息按钮监听器
-        sendButton.addActionListener(e->sendMessage());
+        if (receiverId != -1) {
+            sendButton.addActionListener(e -> sendMessage());
+        } else {
+            sendButton.addActionListener(e ->sendGroupMessage());
+        }
 
         // 表情按钮事件监听器
         emojiButton.addActionListener(e -> {
@@ -234,8 +247,10 @@ public class ChatWindow extends JLabel {
         inputField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_ENTER)
-                    sendMessage();
+                if (e.getKeyCode() == KeyEvent.VK_ENTER){
+                    if(receiverId!=-1) sendMessage();
+                    else sendGroupMessage();
+                }
             }
         });
 
@@ -249,11 +264,22 @@ public class ChatWindow extends JLabel {
                     if (isImage(file)) {
                         try {
                             byte[] fileImage = imageFileToByteArray(file);
-                            SingleChatMessage message=new SingleChatMessage(
-                                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")),
-                                    SingleChatMessage.SENDING,senderId,receiverId,"image",fileImage);
-                            addMessage(message);
-                            listener.sendMessage(message);
+
+                            if(this.receiverId!=-1) {
+                                SingleChatMessage message = new SingleChatMessage(
+                                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")),
+                                        SingleChatMessage.SENDING, senderId, receiverId, "image", fileImage);
+                                addMessage(message);
+                                listener.sendMessage(message);
+                            }else{
+                                System.out.println("准备发图片文件了嗷");
+                                GroupChatMessage message = new GroupChatMessage(
+                                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")),
+                                        GroupChatMessage.SENDING, this.senderId, this.receiverName, "image", fileImage);
+
+                                addMessage(message);
+                                listener.sendGroupMessage(message);
+                            }
                         } catch (IOException ex) {
                             throw new RuntimeException(ex);
                         }
@@ -267,6 +293,9 @@ public class ChatWindow extends JLabel {
             }
         });
     }
+
+
+
     public static byte[] imageFileToByteArray(File file) throws IOException {
         BufferedImage image = ImageIO.read(file);
         if (image == null) {
@@ -277,19 +306,34 @@ public class ChatWindow extends JLabel {
         ImageIO.write(image, "png", baos);
         return baos.toByteArray();
     }
+
     //发送消息逻辑，新增本地花存储
-    private void sendMessage(){
-        if(listener!=null) {
+    private void sendMessage() {
+        if (listener != null) {
             SingleChatMessage singleChatMessage =
                     new SingleChatMessage(
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")),
-                            SingleChatMessage.SENDING,senderId,receiverId,"text",inputField.getText()
+                            SingleChatMessage.SENDING, senderId, receiverId, "text", inputField.getText()
                     );
             addMessage(singleChatMessage);
             inputField.setText("");
             listener.sendMessage(singleChatMessage);
         }
     }
+    //发送群消息
+    private void sendGroupMessage() {
+        if (listener != null) {
+            GroupChatMessage groupChatMessage =
+                    new GroupChatMessage(
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")),
+                            SingleChatMessage.SENDING, senderId, receiverName, "text", inputField.getText()
+                    );
+            addMessage(groupChatMessage);
+            inputField.setText("");
+            listener.sendGroupMessage(groupChatMessage);
+        }
+    }
+
 
     public void moveToBottom() {
         SwingUtilities.invokeLater(() -> {
@@ -299,16 +343,22 @@ public class ChatWindow extends JLabel {
     }
 
     public interface ChatMessageListener {
-        void setInitData(Integer senderId,Integer receiverId);
+        void setInitData(Integer senderId, Integer receiverId);
+
+        void setGroupInitData(Integer senderId, String receiverName);
+
         void sendMessage(SingleChatMessage content);
+
+        void sendGroupMessage(GroupChatMessage content);
         void flushLoginStatus(Integer receiverId);
+
         void getReceiverLoginStatus(Integer receiverId);
     }
 
     @Override
     public void setVisible(boolean aFlag) {
         super.setVisible(aFlag);
-        if (aFlag&&listener!=null) {
+        if (aFlag && listener != null) {
             listener.flushLoginStatus(receiverId);
         }
     }

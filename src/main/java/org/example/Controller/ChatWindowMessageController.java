@@ -4,6 +4,8 @@ import io.netty.channel.ChannelHandlerContext;
 import lombok.Setter;
 
 import org.example.Handler.UserInfoResponseHandler;
+import org.example.Model.Domain.GroupChatMessage;
+import org.example.Model.Domain.Message;
 import org.example.Model.Domain.SingleChatMessage;
 import org.example.Model.Domain.UserInfo;
 import org.example.Model.message.requestMessage.SingleChatTextRequestMessage;
@@ -39,7 +41,7 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
         userInfoService=new UserInfoService();
         if(view!=null) {
             view.setChatWindowMessageListener(this);
-            
+
             // 注册到处理器
             UserInfoResponseHandler.registerController(view.getReceiverId(), this);
         }
@@ -73,13 +75,13 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
     public void setInitData(Integer senderId, Integer receiverId) {
     // 获取用户信息
         List<UserInfo> userInfos = userInfoService.getUserAvatar(senderId, receiverId);
-    
+
     // 检查列表长度并安全访问
         if (userInfos != null && userInfos.size() >= 2) {
         // 原有逻辑 - 有两个用户信息时
             view.setReceiverNameLabel(userInfos.get(1).getNickname());
             view.setStatusLabel("未知");
-        
+
         // 加载头像
             BufferedImage image1 = chatMessageService.getAvatar(userInfos.get(0).getAvatarPath());
             BufferedImage image2 = chatMessageService.getAvatar(userInfos.get(1).getAvatarPath());
@@ -90,11 +92,11 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
             if (userInfos != null && userInfos.size() == 1) {
             // 可能是当前用户
                 BufferedImage image1 = chatMessageService.getAvatar(userInfos.get(0).getAvatarPath());
-            
+
             // 为接收者创建默认信息
                 view.setReceiverNameLabel("用户" + receiverId);
                 view.setStatusLabel("未知");
-            
+
             // 为接收者创建默认头像
                 BufferedImage defaultImage = createDefaultAvatar(receiverId);
                 view.setAvatar(image1, defaultImage);
@@ -102,26 +104,48 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
             // 完全没有用户信息的情况
                 view.setReceiverNameLabel("用户" + receiverId);
                 view.setStatusLabel("未知");
-            
+
             // 创建默认头像
                 BufferedImage defaultSenderImage = createDefaultAvatar(senderId);
                 BufferedImage defaultReceiverImage = createDefaultAvatar(receiverId);
                 view.setAvatar(defaultSenderImage, defaultReceiverImage);
             }
-        
+
         // 可能需要重新获取用户信息
             if (ctx != null) {
             // 向服务器请求用户信息 - 您可能需要实现这个方法
                 userInfoService.requestUserInfo(senderId, receiverId, ctx);
             }
         }
-    
+
     // 加载本地聊天记录
         List<SingleChatMessage> singleChatMessages = chatMessageService.getSingleChatTextMessage(senderId, receiverId);
         for (SingleChatMessage singleChatMessage : singleChatMessages) {
             view.addMessage(singleChatMessage);
         }
-    
+
+        view.revalidate();
+        view.repaint();
+    }
+
+    @Override
+    public void setGroupInitData(Integer senderId, String receiverName) {
+        System.out.println("群聊初始化入口");
+        System.out.println("发送人和接收人ID："+senderId+"  "+receiverName);
+        //List<UserInfo>userInfos= userInfoService.getUserAvatar(senderId);
+        //System.out.println(userInfos);
+        view.setReceiverNameLabel(receiverName);
+        view.setStatusLabel("");
+        //加载头像
+        BufferedImage image1=chatMessageService.getAvatar("img.png");
+        BufferedImage image2=chatMessageService.getAvatar("img.png");
+        view.setAvatar(image1,image2);
+        //加载本地数据,带发送人名字
+        List<GroupChatMessage>groupChatMessages=chatMessageService.getGroupChatTextMessage(receiverName);
+        for(GroupChatMessage groupChatMessage:groupChatMessages){
+            view.addMessage(groupChatMessage);
+
+        }
         view.revalidate();
         view.repaint();
     }
@@ -132,14 +156,14 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
         int height = 40;
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = img.createGraphics();
-    
+
     // 根据用户ID生成颜色
         int r = (userId * 123) % 256;
         int g = (userId * 255) % 256;
         int b = (userId * 189) % 256;
         g2d.setColor(new Color(r, g, b));
         g2d.fillRect(0, 0, width, height);
-    
+
     // 添加用户ID作为标识
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 16));
@@ -148,7 +172,7 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
         int strWidth = fm.stringWidth(label);
         int strHeight = fm.getHeight();
         g2d.drawString(label, (width - strWidth) / 2, height / 2 + strHeight / 4);
-    
+
         g2d.dispose();
         return img;
     }
@@ -156,11 +180,11 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
         // 添加新方法更新用户信息
     public void updateUserInfo(UserInfo userInfo) {
         if (userInfo == null || view == null) return;
-        
+
         SwingUtilities.invokeLater(() -> {
             // 更新名称
             view.setReceiverNameLabel(userInfo.getNickname());
-            
+
             // 更新头像
             if (userInfo.getAvatarPath() != null && !userInfo.getAvatarPath().isEmpty()) {
                 BufferedImage avatar = chatMessageService.getAvatar(userInfo.getAvatarPath());
@@ -172,7 +196,7 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
                     }
                 }
             }
-            
+
             view.revalidate();
             view.repaint();
         });
@@ -188,6 +212,11 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
     @Override
     public void sendMessage(SingleChatMessage content) {
         chatMessageService.sendMessage(content,ctx);
+    }
+
+    @Override
+    public void sendGroupMessage(GroupChatMessage content) {
+        chatMessageService.sendGroupMessage(content,ctx);
     }
 
     @Override
@@ -211,13 +240,12 @@ public class ChatWindowMessageController implements ChatWindow.ChatMessageListen
         timer.scheduleAtFixedRate(task, 0, 10000);
     }
 
-    public void receiveMessage(SingleChatMessage s) {
-        view.addMessage(s);
-
-        if(s.getType().equals("text")){
-            chatMessageService.persistentMessage(s.getReceiverID(),s.getSenderID(),s.getReceiverID(),(String)s.getContent());
+    public void receiveMessage(Message ChatMessage) {
+        //处理收到的数据，为senderName赋值
+        if(ChatMessage instanceof GroupChatMessage) {
+            ChatMessage.senderName = userInfoService.getNameById(ChatMessage.getSenderID());
         }
-
+        view.addMessage(ChatMessage);
     }
 
     public void setLoginStatus(String loginStatus) {

@@ -12,17 +12,18 @@ import javax.swing.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Map;
+import java.util.Objects;
 
 public class MainFrame extends JFrame {
 
-
+    private ChatWindow currentChatWindow = null;
     private ChatListController chatListController;
-
-    private Map<Integer,ChatWindowMessageController>chatWindowMessageControllerMap;
+    private Map<Integer,ChatWindow> chatWindowMap;
+    private Map<Object,ChatWindowMessageController>chatWindowMessageControllerMap;
     //是否联网
     @Getter
     boolean isCtx;
-
+    private ChatWindow currentWindow;
     public MainFrame(Integer userId) {
         setTitle("Main Frame");
 
@@ -50,16 +51,11 @@ public class MainFrame extends JFrame {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-
-            Map<Integer,ChatWindow>chatWindowMap=chatListPanel.getChatWindowMap();
+            Map<Object,ChatWindow>chatWindowMap=chatListPanel.getChatWindowMap();
             chatWindowMessageControllerMap=chatListPanel.getChatWindowMessageControllerMap();
-
             MessageCache.setChatWindowMessageControllerMap(chatWindowMessageControllerMap);
             MessageCache.setChatListController(chatListController);
-
-
-
-            for(Map.Entry<Integer,ChatWindow> entry:chatWindowMap.entrySet()){
+            for(Map.Entry<Object,ChatWindow> entry:chatWindowMap.entrySet()){
                 entry.getValue().setBounds(300, 0, 610, 613);
                 add(entry.getValue());
             }
@@ -69,23 +65,28 @@ public class MainFrame extends JFrame {
 
             chatListController.sendInitMessage(userId);
 
-            while (true){
+            while(true){
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-
                 if(chatListPanel.flag){
+                    System.out.println("建哥秘卤");
                     add(chatListPanel.tempWindow);
-                    chatListPanel.tempWindow.setVisible(false);
-                    chatListPanel.tempWindow.setBounds(300, 0, 610, 613);
                     chatListPanel.flag=false;
                 }
             }
         }).start();
 
 
+    }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new MainFrame(1);
+            }
+        });
     }
 
     public void addCtx(ChannelHandlerContext ctx){
@@ -94,10 +95,9 @@ public class MainFrame extends JFrame {
         ThreadPoolManager.getDBExecutorService().execute(() -> {
             try {
                 chatListController.getLatch().await();
-                // for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
-                //     entry.getValue().setCtx(ctx);
-                // }
-                // 添加空检查
+                for(Map.Entry<Object,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
+                    entry.getValue().setCtx(ctx);
+
                 if (chatWindowMessageControllerMap != null) {
                     for (Map.Entry<Integer,ChatWindowMessageController> entry : chatWindowMessageControllerMap.entrySet()){
                         entry.getValue().setCtx(ctx);
@@ -107,18 +107,14 @@ public class MainFrame extends JFrame {
         });
     }
 
-    public void removeCtx(){
-        isCtx=false;
-        chatListController.setCtx(null);
-        // for(Map.Entry<Integer,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
-        //     entry.getValue().setCtx(null);
-        // }
-        // 添加空检查
-        if (chatWindowMessageControllerMap != null) {
-            for (Map.Entry<Integer,ChatWindowMessageController> entry : chatWindowMessageControllerMap.entrySet()){
+        public void removeCtx(){
+            isCtx=false;
+            chatListController.setCtx(null);
+            for(Map.Entry<Object,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
                 entry.getValue().setCtx(null);
             }
         }
+
     }
 
 

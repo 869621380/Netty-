@@ -9,7 +9,9 @@ import org.example.Model.Domain.ChatItem;
 import org.example.Model.Domain.UserInfo;
 import org.example.Model.message.requestMessage.AddFriendRequestMessage;
 import org.example.Model.message.requestMessage.SearchFriendRequestMessage;
+import org.example.Model.message.responseMessage.GroupCreateResponseMessage;
 import org.example.Service.ChatListService;
+import org.example.Service.GroupManageService;
 import org.example.Util.ThreadPoolManager;
 import org.example.View.AddFriendDialog;
 import org.example.View.ChatListPanel;
@@ -19,9 +21,13 @@ import org.example.View.GroupMemberSelectPanel;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -32,6 +38,7 @@ public class ChatListController implements ChatListPanel.ChatListListener,
 
     private final ChatListPanel view;
     private final ChatListService chatListService;
+    private final GroupManageService groupManageService;
 
 
     @Getter
@@ -42,6 +49,7 @@ public class ChatListController implements ChatListPanel.ChatListListener,
     public ChatListController(ChatListPanel view) {
         this.view = view;
         chatListService=new ChatListService();
+        groupManageService=new GroupManageService();
         view.setChatListener(this);
         view.setCreateGroupListener(this);// 新增这行
         view.setAddFriendListener(this);//好友添加
@@ -49,19 +57,23 @@ public class ChatListController implements ChatListPanel.ChatListListener,
 
     @Override
     public void setInitData(Integer userId) {
+        //单聊+群聊列表
         List<ChatItem>chatItems=chatListService.getChatItems(userId);
         view.addChatItem(chatItems);
         view.revalidate();
         view.repaint();
         ThreadPoolManager.getDBExecutorService().execute(() -> {
             if(chatItems!=null)
-                view.addChatWindow(chatItems);
+                view.addChatWindow(chatItems); //修改聊天框的记录获取方式，兼容单聊和群聊
 
             latch.countDown();
         });
 
     }
-
+//    public void updateChatWindow(String groupName){
+//        System.out.println(view.getChatWindowMap().get(groupName));
+//        view.getChatWindowMap().get(groupName).setVisible(true);
+//    }
     public void updatePreview(Integer receiverId,String content) {
         view.updateItem(receiverId,content);
 
@@ -84,13 +96,13 @@ public class ChatListController implements ChatListPanel.ChatListListener,
         dialog.setAddFriendListener(new AddFriendDialog.AddFriendListener() {
             @Override
             public void onSearchFriend(Integer friendId, AddFriendDialog.SearchFriendCallback callback) {
-               
+
                 searchUser(friendId, callback);
             }
 
             @Override
             public void onAddFriend(Integer userId, Integer friendId, AddFriendDialog.AddFriendCallback callback) {
-               
+
                 addFriend(userId, friendId, callback);
             }
         });
@@ -104,16 +116,16 @@ public class ChatListController implements ChatListPanel.ChatListListener,
         });
         return;
     }
-    
+
     // 创建搜索好友请求消息
     SearchFriendRequestMessage requestMessage = new SearchFriendRequestMessage(view.getUserId(), friendId);
-    
+
     // 设置回调处理响应
     MessageCache.setSearchFriendCallback(response -> {
         if (response.isSuccess()) {
             // 搜索成功，返回用户信息
             UserInfo userInfo = response.getUserInfo();
-            
+
             // 创建用户头像
             ImageIcon avatar = null;
             if (userInfo.getAvatarPath() != null && !userInfo.getAvatarPath().isEmpty()) {
@@ -132,7 +144,7 @@ public class ChatListController implements ChatListPanel.ChatListListener,
             } else {
                 avatar = createDefaultAvatar(friendId, 40, 40);
             }
-            
+
             final ImageIcon finalAvatar = avatar;
             SwingUtilities.invokeLater(() -> {
                 if (response.isAlreadyFriend()) {
@@ -148,7 +160,7 @@ public class ChatListController implements ChatListPanel.ChatListListener,
             });
         }
     });
-    
+
     // 发送请求
     ctx.writeAndFlush(requestMessage);
 }
@@ -161,10 +173,10 @@ private void addFriend(Integer userId, Integer friendId, AddFriendDialog.AddFrie
         });
         return;
     }
-    
+
     // 创建添加好友请求消息
     AddFriendRequestMessage requestMessage = new AddFriendRequestMessage(userId, friendId);
-    
+
     // 设置回调处理响应
     MessageCache.setAddFriendCallback(response -> {
         if (response.isSuccess()) {
@@ -188,7 +200,7 @@ private void addFriend(Integer userId, Integer friendId, AddFriendDialog.AddFrie
                 view.addChatWindow(newFriend,"添加好友");
                 // 通知回调添加成功
                 callback.onSuccess();
-                
+
                 // 如果需要，打开与新好友的聊天窗口
                 ChatWindow friendWindow = view.getChatWindowMap().get(receiverId);
                 if (view.getCurrentChatWindow() != null) {
@@ -204,7 +216,7 @@ private void addFriend(Integer userId, Integer friendId, AddFriendDialog.AddFrie
             });
         }
     });
-    
+
     // 发送请求
     ctx.writeAndFlush(requestMessage);
 }
@@ -213,14 +225,14 @@ private void addFriend(Integer userId, Integer friendId, AddFriendDialog.AddFrie
     private ImageIcon createDefaultAvatar(int userId, int width, int height) {
         BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g2d = img.createGraphics();
-    
+
     // 根据用户ID生成颜色
         int r = (userId * 123) % 256;
         int g = (userId * 255) % 256;
         int b = (userId * 189) % 256;
         g2d.setColor(new Color(r, g, b));
         g2d.fillRect(0, 0, width, height);
-    
+
     // 添加用户ID的第一个字符作为标识
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 20));
@@ -229,7 +241,7 @@ private void addFriend(Integer userId, Integer friendId, AddFriendDialog.AddFrie
         int strWidth = fm.stringWidth(label);
         int strHeight = fm.getHeight();
         g2d.drawString(label, (width - strWidth) / 2, height / 2 + strHeight / 4);
-    
+
         g2d.dispose();
         return new ImageIcon(img);
     }
@@ -238,9 +250,14 @@ private void addFriend(Integer userId, Integer friendId, AddFriendDialog.AddFrie
     public void onCreateGroupRequested(Integer userId) {
         // 获取当前所有联系人作为可选成员
         List<ChatItem> allContacts = chatListService.getChatItems(userId);
+        List<ChatItem> singChatItems=new ArrayList<>();
+        for (int i = 0; i < allContacts.size(); i++) {
+            if(allContacts.get(i).getReceiverType()==0)
+                singChatItems.add(allContacts.get(i));
+        }
 
         // 创建群成员选择对话框
-        GroupMemberSelectPanel selectPanel = new GroupMemberSelectPanel(allContacts);
+        GroupMemberSelectPanel selectPanel = new GroupMemberSelectPanel(singChatItems);
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(view), "创建新群聊", true);
         dialog.setContentPane(selectPanel);
         dialog.setSize(400, 600);
@@ -248,20 +265,21 @@ private void addFriend(Integer userId, Integer friendId, AddFriendDialog.AddFrie
 
         // 确认按钮事件
         selectPanel.getConfirmButton().addActionListener(e -> {
-            List<ChatItem> selectedMembers = selectPanel.getSelectedMembers();
+            Set<Integer> selectedMembers = selectPanel.getSelectedMembers();
             if (selectedMembers.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "请至少选择一名成员", "提示", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             // 实际创建群聊的逻辑
-            createNewGroup(selectedMembers,userId,dialog);
+            selectedMembers.add(userId);//加上自己
+            createNewGroup(userId,selectedMembers,ctx);
             dialog.dispose();
         });
 
         dialog.setVisible(true);
     }
-    private void createNewGroup(List<ChatItem> selectedMembers,Integer userId,JDialog dialog) {
+    private void createNewGroup(Integer userId,Set<Integer> selectedMembers,ChannelHandlerContext ctx) {
         // 这里实现实际的群聊创建逻辑
         // 1. 弹出输入群名称的对话框
         String groupName = JOptionPane.showInputDialog(view, "请输入群名称:", "群名称", JOptionPane.PLAIN_MESSAGE);
@@ -270,22 +288,40 @@ private void addFriend(Integer userId, Integer friendId, AddFriendDialog.AddFrie
         }
 
         // 2. 调用服务层创建群聊
-//        List<Integer> memberIds = selectedMembers.stream()
-//                .map(ChatItem::getReceiverId)
-//                .collect(Collectors.toList());
+        groupManageService.createGroup(userId,groupName,selectedMembers,ctx);
 
-        // 假设有一个服务方法 createGroup
-//        ChatItem newGroup = chatListService.createGroup(userId, groupName, memberIds);
+        return;
+    }
 
-        //测试代码
-        ChatItem newGroup=new ChatItem(1,2,groupName,"img.png",1,"这是个群聊",null);
+    public void addGroupItem(GroupCreateResponseMessage groupCreateResponseMessage){
 
+        ChatItem newGroup=new ChatItem(1,-1,groupCreateResponseMessage.getReason().split(":")[1],"img.png",1,groupCreateResponseMessage.getReason(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         // 3. 更新UI
         view.addChatItem(Collections.singletonList(newGroup));
         view.addChatWindow(Collections.singletonList(newGroup));
 
         // 4. 打开新群聊窗口
-        ChatWindow groupWindow = view.getChatWindowMap().get(newGroup.getReceiverId());
+        ChatWindow groupWindow = view.getChatWindowMap().get(newGroup.getReceiverName());
+        //System.out.println("新窗口："+newGroup.getReceiverName());
+        //System.out.println("view:"+view);
+        if (view.getCurrentChatWindow() != null) {
+            view.getCurrentChatWindow().setVisible(false);
+        }
+        view.setCurrentChatWindow(groupWindow);
+        groupWindow.setVisible(true);
+
+    }
+    public void addGroupItem(GroupCreateResponseMessage groupCreateResponseMessage,ChannelHandlerContext ctx){
+
+        ChatItem newGroup=new ChatItem(1,-1,groupCreateResponseMessage.getReason().split(":")[1],"img.png",1,groupCreateResponseMessage.getReason(), LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        // 3. 更新UI
+        view.addChatItem(Collections.singletonList(newGroup));
+        view.addChatWindow(Collections.singletonList(newGroup),ctx);
+
+        // 4. 打开新群聊窗口
+        ChatWindow groupWindow = view.getChatWindowMap().get(newGroup.getReceiverName());
+        //System.out.println("新窗口："+newGroup.getReceiverName());
+        //System.out.println("view:"+view);
         if (view.getCurrentChatWindow() != null) {
             view.getCurrentChatWindow().setVisible(false);
         }
@@ -313,14 +349,14 @@ private void addFriend(Integer userId, Integer friendId, AddFriendDialog.AddFrie
         Integer userId = getCurrentUserId();
         if (userId != null) {
             List<ChatItem> chatItems = chatListService.getChatItems(userId);
-        
+
             SwingUtilities.invokeLater(() -> {
                 // 清空现有列表
                 view.clearChatList();
-            
+
                 // 添加刷新后的列表
                 view.addChatItem(chatItems);
-            
+
                 view.revalidate();
                 view.repaint();
             });
@@ -369,5 +405,11 @@ private void addFriend(Integer userId, Integer friendId, AddFriendDialog.AddFrie
             System.err.println("处理新好友信息失败: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public void updateGroupPreview(String groupName, String content) {
+        view.updateItem(groupName,content);
+        view.revalidate();
+        view.repaint();
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service("chatListService")
@@ -24,37 +25,30 @@ public class ChatListService {
     private final FriendshipsMapper friendshipsMapper;
 
     private final UserMapper userMapper;
-
+    private final Group_membersMapper group_membersMapper;
+    private final GroupsMapper groupsMapper;
     public ChatListService() {
         this.friendshipsMapper = MyBatisUtil.friendshipsMapper;
         this.userMapper = MyBatisUtil.userMapper;
+        this.group_membersMapper=MyBatisUtil.group_membersMapper;
+        this.groupsMapper = MyBatisUtil.groupsMapper;
     }
 
     public List<ChatItem> getChatItems(Integer userId) {
         //return chatListMapper.getChatItems(userId);
         //获取当前用户所有好友ID
         List<Integer> friendsID=friendshipsMapper.selectFriendIdsByUserId1(userId);
-        if (!friendsID.isEmpty()){
+        List<ChatItem> groupsItem=group_membersMapper.selectGroupNameByUserId(userId);
+        if (!friendsID.isEmpty() ){
             List<ChatItem> friendsItem = userMapper.selectChatItemsByIds(friendsID);
+            friendsItem.addAll(groupsItem);
             return friendsItem;
         }
         return null;
     }
 
 
-    public ChatItem createGroup(Integer creatorId, String groupName, List<Integer> memberIds) {
-        // 实现创建群聊的逻辑
-        // 返回新创建的群聊项
-        ChatItem group = new ChatItem();
-        group.setReceiverId(-1); // 假设这是群ID
-        group.setReceiverName(groupName);
-        group.setPreview("[新群聊]");
-        group.setPreviewTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        group.setUnreadCount(0);
-        group.setAvatarPath("img.png"); // 需要定义这个常量
 
-        return group;
-    }
 
     public void sendInitMessage(Integer userId, ChannelHandlerContext ctx) {
         InitOKMessage initOKMessage = new InitOKMessage();
@@ -62,4 +56,22 @@ public class ChatListService {
         ctx.writeAndFlush(initOKMessage);
         log.debug("发送了离线数据请求");
     }
+
+    public int createGroup(Integer creator, String name, Set<Integer> members) {
+
+        int t = groupsMapper.createGroup(name, creator);
+        if (t != 0) {
+            for (Integer i : members) {
+                joinMember(name, i);
+            }
+            return t;
+        } else {
+            return 0;
+        }
+    }
+
+    public int joinMember(String name, Integer member) {
+        return group_membersMapper.joinMember(name, member);
+    }
 }
+

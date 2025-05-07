@@ -29,7 +29,11 @@ public class UserInfoService {
     public List<UserInfo> getUserAvatar(int senderId, int receiverId) {
 
         //return userInfoMapper.getUserInfoByIds(senderId, receiverId);
-        return userMapper.getUserInfoByIds(senderId,receiverId);
+        return userMapper.getUserInfoByIds(senderId,receiverId); //返回的是发送方和接收方的UserInfo
+    }
+
+    public String getNameById(Integer senderID) {
+        return userMapper.getNameById(senderID);
     }
 
     /**

@@ -1,11 +1,15 @@
 package org.example;
 
-import ch.qos.logback.core.net.SocketConnector;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.example.Controller.LoginController;
 import org.example.Handler.*;
@@ -22,11 +26,37 @@ import static org.example.Util.Constants.SERVER_HOST;
 import static org.example.Util.Constants.SERVER_PORT;
 
 public class Client {
+    private static final String HOST = "localhost";
+    private static final int PORT = 8888;
+
     private static final Logger log = LoggerFactory.getLogger(Client.class);
 
     private static final int RECONNECT_DELAY = 1; // 重连间隔时间（秒）
 
     public static void main(String[] args) {
+
+        try {
+        // 配置 SSL 上下文
+        SslContext sslCtx = SslContextBuilder.forClient()
+                .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+        EventLoopGroup group = new NioEventLoopGroup();
+
+            Bootstrap b = new Bootstrap();
+            b.group(group)
+                    .channel(NioSocketChannel.class)
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        public void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline pipeline = ch.pipeline();
+                            // 添加 SSL 处理器
+                            pipeline.addLast(sslCtx.newHandler(ch.alloc(), HOST, PORT));
+                            pipeline.addLast(new StringDecoder());
+                            pipeline.addLast(new StringEncoder());
+                        }
+                    });
+        }catch(Exception e){
+            e.printStackTrace();
+        }
         LoginView loginView = new LoginView();
         LoginController loginController = new LoginController(loginView);
         NioEventLoopGroup group = new NioEventLoopGroup();
@@ -46,11 +76,15 @@ public class Client {
                 ch.pipeline().addLast(new LoginStatusResponseHandler());
                 ch.pipeline().addLast(new SingleChatRequestHandler());
                 ch.pipeline().addLast(new ExceptionHandler());
-                
+
                 ch.pipeline().addLast(new SearchFriendResponseHandler());
                 ch.pipeline().addLast(new AddFriendResponseHandler());
-                
+
                 ch.pipeline().addLast(new UserInfoResponseHandler());
+
+                ch.pipeline().addLast(new GroupCreateResponseHandler());
+                ch.pipeline().addLast(new GroupChatTextResponseHandler());
+                ch.pipeline().addLast(new GroupChatImageResponseHandler());
             }
         });
 

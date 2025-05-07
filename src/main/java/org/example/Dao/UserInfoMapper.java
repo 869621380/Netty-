@@ -18,4 +18,6 @@ public interface UserInfoMapper {
             "        WHEN #{receiverId} THEN 2 " +
             "    END;")
     List<UserInfo> getUserInfoByIds(@Param("senderId") Integer senderId, @Param("receiverId") Integer receiverId);
+
+
 }

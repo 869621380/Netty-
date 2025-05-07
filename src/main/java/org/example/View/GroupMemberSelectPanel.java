@@ -108,15 +108,17 @@ public class GroupMemberSelectPanel extends JPanel {
         return new ArrayList<>(selectedMemberNames); // 返回副本保护内部数据
     }
 
-    public List<ChatItem> getSelectedMembers() {
+    public Set<Integer> getSelectedMembers() {
         List<ChatItem> selected = new ArrayList<>();
+        Set<Integer>selectedIDs=new HashSet<>();
         for (int i = 0; i < listModel.size(); i++) {
             ChatItem member = listModel.getElementAt(i);
             if (selectedMemberIds.contains(member.getReceiverId())) {
                 selected.add(member);
+                selectedIDs.add(member.getReceiverId());
             }
         }
-        return selected;
+        return selectedIDs;
     }
 
     class ChatItemRenderer extends JPanel implements ListCellRenderer<ChatItem> {

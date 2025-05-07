@@ -97,11 +97,6 @@ public class MainFrame extends JFrame {
                 chatListController.getLatch().await();
                 for(Map.Entry<Object,ChatWindowMessageController> entry:chatWindowMessageControllerMap.entrySet()){
                     entry.getValue().setCtx(ctx);
-
-                if (chatWindowMessageControllerMap != null) {
-                    for (Map.Entry<Integer,ChatWindowMessageController> entry : chatWindowMessageControllerMap.entrySet()){
-                        entry.getValue().setCtx(ctx);
-                    }
                 }
             }catch(InterruptedException e){}
         });
@@ -117,6 +112,4 @@ public class MainFrame extends JFrame {
 
     }
 
-
-}
 

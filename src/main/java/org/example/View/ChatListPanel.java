@@ -43,8 +43,6 @@ public class ChatListPanel extends JPanel {
     public boolean flag;
     public ChatWindow tempWindow;
 
-    boolean flag=false;
-    ChatWindow tempWindow;
 
     public Integer getUserId() {
         return this.userId;
@@ -430,7 +428,7 @@ public class ChatListPanel extends JPanel {
 
 
     public void addChatWindow(ChatItem chatItem) {
-        ChatWindow chatWindow=new ChatWindow(userId,chatItem.getReceiverId());
+        ChatWindow chatWindow=new ChatWindow(userId,chatItem.getReceiverId(),chatItem.getReceiverName());
         chatWindowMap.put(chatItem.getReceiverId(),chatWindow);
         //  chatWindowMessageController.setView(chatWindow);
         ChatWindowMessageController chatWindowMessageController=new ChatWindowMessageController(chatWindow);
@@ -441,7 +439,7 @@ public class ChatListPanel extends JPanel {
     }
 
     public void addChatWindow(ChatItem chatItem,String receiverId) {
-        ChatWindow chatWindow=new ChatWindow(userId,chatItem.getReceiverId());
+        ChatWindow chatWindow=new ChatWindow(userId,chatItem.getReceiverId(),chatItem.getReceiverName());
         chatWindowMap.put(chatItem.getReceiverId(),chatWindow);
         //  chatWindowMessageController.setView(chatWindow);
         ChatWindowMessageController chatWindowMessageController=new ChatWindowMessageController(chatWindow);

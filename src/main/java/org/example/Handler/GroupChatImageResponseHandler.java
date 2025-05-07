@@ -29,7 +29,7 @@ public class GroupChatImageResponseHandler extends SimpleChannelInboundHandler<G
         groupChatMessage.setType("image");
         groupChatMessage.setContent(((GroupChatImageResponseMessage)groupChatImageResponseMessage).getContent());
         //更新preview
-        //MessageCache.getChatListController().updatePreview(groupChatMessage.getSenderID(),"[图片]");
+        MessageCache.getChatListController().updateGroupPreview(groupChatImageResponseMessage.getGroupName(),"[图片]");
         chatWindowMessageController.receiveMessage(groupChatMessage);
     }
 }

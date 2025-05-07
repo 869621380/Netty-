@@ -44,7 +44,7 @@ public class LoginView extends JFrame {
         setLayout(null);
 
         try {
-            backgroundImage = ImageIO.read(new File("img.png"));
+            backgroundImage = ImageIO.read(new File("img1.png"));
         } catch (IOException e) {
             log.error(e.getMessage());
         }

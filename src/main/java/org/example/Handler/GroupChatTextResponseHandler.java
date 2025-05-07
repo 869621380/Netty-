@@ -6,6 +6,7 @@ import org.example.Cache.MessageCache;
 import org.example.Controller.ChatWindowMessageController;
 import org.example.Model.Domain.GroupChatMessage;
 import org.example.Model.message.responseMessage.GroupChatTextResponseMessage;
+import org.example.Service.ChatMessageService;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,8 +31,12 @@ public class GroupChatTextResponseHandler extends SimpleChannelInboundHandler<Gr
             groupChatMessage.setType("text");
             groupChatMessage.setContent(((GroupChatTextResponseMessage)groupChatTextResponseMessage).getContent());
             //更新preview
-            //MessageCache.getChatListController().updatePreview(groupChatMessage.getSenderID(),(String) groupChatMessage.getContent());
+        MessageCache.getChatListController().updateGroupPreview(groupChatTextResponseMessage.getGroupName(), (String) groupChatTextResponseMessage.getContent());
 
         chatWindowMessageController.receiveMessage(groupChatMessage);
+        //收到的消息存数据库
+        ChatMessageService chatMessageService=new ChatMessageService();
+        chatMessageService.groupChatRecordsMapper.insertGroupMessage(groupChatTextResponseMessage.getFrom(),groupChatTextResponseMessage.getGroupName(),groupChatTextResponseMessage.getContent());
+
     }
 }

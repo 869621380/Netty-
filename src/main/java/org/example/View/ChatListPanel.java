@@ -188,7 +188,16 @@ public class ChatListPanel extends JPanel {
             }
         }
     }
-
+    public void updateItem(String groupName, String content) {
+        for (int i = 0; i < listModel.size(); i++) {
+            ChatItem chatItem = listModel.get(i);
+            if (chatItem.getReceiverName().equals(groupName)) {
+                chatItem.setPreview(content);
+                chatItem.setPreviewTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+                break;
+            }
+        }
+    }
 
     static class ChatItemRenderer extends JPanel implements ListCellRenderer<ChatItem> {
         private final JLabel iconLabel = new JLabel();

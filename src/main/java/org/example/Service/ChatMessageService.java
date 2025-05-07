@@ -28,7 +28,7 @@ public class ChatMessageService {
 
     ChatMessageMapper chatMessageMapper;
     Private_chat_recordsMapper private_chat_recordsMapper;
-    Group_chat_recordsMapper groupChatRecordsMapper;
+    public Group_chat_recordsMapper groupChatRecordsMapper;
     ;
     public ChatMessageService() {
         chatMessageMapper= MyBatisUtil.chatMessageMapper;
@@ -107,7 +107,7 @@ public class ChatMessageService {
         if(content.getType().equals("text")){
             groupChatRequestMessage=new GroupChatTextRequestMessage(content.getSendTime(),content.getSenderID(),content.getGroupName(),(String) content.getContent());
             //补全preview
-            //MessageCache.getChatListController().updatePreview(content.getReceiverID(), (String) content.getContent());
+            MessageCache.getChatListController().updateGroupPreview(content.getGroupName(), (String) content.getContent());
             int result=groupChatRecordsMapper.insertGroupMessage(content.getSenderID(),content.getGroupName(),content.getContent());
             System.out.println("success:"+result);
         }
@@ -115,7 +115,7 @@ public class ChatMessageService {
 
             groupChatRequestMessage=new GroupChatImageRequestMessage(content.getSendTime(),content.getSenderID(),content.getGroupName(),(byte[])content.getContent());
             //补全preview
-            //MessageCache.getChatListController().updatePreview(content.getReceiverID(),"[图片]");
+            MessageCache.getChatListController().updateGroupPreview(content.getGroupName(),"[图片]");
         }
         System.out.println("ctx=="+ctx);
         if(ctx!=null&&groupChatRequestMessage!=null){

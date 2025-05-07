@@ -163,4 +163,10 @@ public class ChatListController implements ChatListPanel.ChatListListener,
             System.out.println("ctx为空");
         }
     }
+
+    public void updateGroupPreview(String groupName, String content) {
+        view.updateItem(groupName,content);
+        view.revalidate();
+        view.repaint();
+    }
 }

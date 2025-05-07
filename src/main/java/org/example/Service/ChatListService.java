@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service("chatListService")
@@ -25,10 +26,12 @@ public class ChatListService {
 
     private final UserMapper userMapper;
     private final Group_membersMapper group_membersMapper;
+    private final GroupsMapper groupsMapper;
     public ChatListService() {
         this.friendshipsMapper = MyBatisUtil.friendshipsMapper;
         this.userMapper = MyBatisUtil.userMapper;
         this.group_membersMapper=MyBatisUtil.group_membersMapper;
+        this.groupsMapper = MyBatisUtil.groupsMapper;
     }
 
     public List<ChatItem> getChatItems(Integer userId) {
@@ -53,4 +56,22 @@ public class ChatListService {
         ctx.writeAndFlush(initOKMessage);
         log.debug("发送了离线数据请求");
     }
+
+    public int createGroup(Integer creator, String name, Set<Integer> members) {
+
+        int t = groupsMapper.createGroup(name, creator);
+        if (t != 0) {
+            for (Integer i : members) {
+                joinMember(name, i);
+            }
+            return t;
+        } else {
+            return 0;
+        }
+    }
+
+    public int joinMember(String name, Integer member) {
+        return group_membersMapper.joinMember(name, member);
+    }
 }
+
